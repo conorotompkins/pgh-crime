@@ -54,3 +54,4 @@ df %>%
   #facet_wrap(~incident_month, ncol = 1) +
   scale_fill_viridis(discrete = TRUE) +
   scale_color_viridis(discrete = TRUE)
+ggsave("pgh_crime_date_month_line_plot.png", width = 16, height = 9)
