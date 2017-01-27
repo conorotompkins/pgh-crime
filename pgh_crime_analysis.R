@@ -39,11 +39,11 @@ df <- df %>%
          incident_location,
          incident_neighborhood,
          incident_zone,
+         hierarchy_description,
          cleared_flag,
          x,
          y)
 glimpse(df)
-
 
 df %>%
   group_by(incident_zone) %>% 
@@ -78,3 +78,19 @@ df %>%
   facet_wrap(~incident_zone, ncol = 1) +
   scale_fill_viridis(discrete = TRUE) +
   scale_color_viridis(discrete = TRUE)
+
+descriptions <- df %>%
+  #filter(incident_zone == 2) %>% 
+  group_by(hierarchy_description) %>% 
+  count() %>% 
+  arrange(-n)
+
+pot_arrests <- df %>%
+  filter(grepl("MARIJUANA", hierarchy_description) == TRUE) %>%
+  group_by(incident_date) %>% 
+  count() 
+str(pot_arrests)
+
+ggplot(data = pot_arrests, aes(x = incident_date, y = n)) +
+  geom_smooth()
+
