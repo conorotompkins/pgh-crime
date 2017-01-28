@@ -1,0 +1,109 @@
+---
+title: "Pittsburgh Arrest Data Exploratory Analysis"
+author: "Conor Tompkins"
+date: "January 28, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exploratory Analysis
+
+The Western Pennsylvania Regional Data Center (http://www.wprdc.org/) is a great resource for data about Pittsburgh
+
+They have published an archive of crime incident data from 2005-2015
+
+You can download the data here: https://data.wprdc.org/dataset/uniform-crime-reporting-data
+
+We will be using the following R packages for this analysis
+
+- tidyverse
+- lubridate
+- viridis
+- ggmap
+
+Install these packages using the following code
+
+#```{r}
+#install.packages(c("tidyverse", "lubridate", "viridis", "ggmap"), repos = )
+#```
+
+Then load the packages
+```{r load libraries}
+library(tidyverse)
+library(lubridate)
+library(viridis)
+library(ggmap)
+```
+
+First, we need to read the data into R
+
+```{r read data into r}
+df <- read_csv("archive-police-blotter.csv")
+```
+readr tells us how it interpreted the column classes, and alerted us that it was unable to load 6 rows from the data
+
+Next, we will change the column names so they are easier to work with
+```{r lower case column names}
+colnames(df) <- tolower(colnames(df))
+```
+Then, rename the column names
+```{r rename columnn names}
+df <- df %>% 
+  rename(date_time = incidenttime,
+         location = incidentlocation,
+         cleared_flag = clearedflag,
+         neighborhood = incidentneighborhood,
+         zone = incidentzone,
+         description = hierarchydesc,
+         tract = incidenttract)
+```
+
+Next, we will use lubridate to change the relevant columns to dates and times
+```{r lubridate column names}
+df <- df %>%
+  mutate(date_time = mdy_hm(date_time),
+         date = ymd(substr(date_time, 1, 10)),
+         year = year(date),
+         month = month(date, label = TRUE),
+         wday = wday(date, label = TRUE),
+         mday = mday(date))
+```         
+Now we will reorder the columns and select the ones we want to work with
+```{r reorder column names}
+df <- df %>% 
+  select(date, 
+         year,
+         month,
+         wday,
+         mday,
+         location,
+         neighborhood,
+         zone,
+         description,
+         cleared_flag,
+         x,
+         y)
+```         
+Let's see how the data look now
+```{r glimpse data}
+glimpse(df)
+```
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
