@@ -1,13 +1,11 @@
 Exploratory Analysis
 --------------------
 
-The Western Pennsylvania Regional Data Center (<http://www.wprdc.org/>)
-is a great resource for data about Pittsburgh
+The Western Pennsylvania Regional Data Center (<http://www.wprdc.org/>) is a great resource for data about Pittsburgh
 
 They have published an archive of crime incident data from 2005-2015
 
-You can download the data here:
-<https://data.wprdc.org/dataset/uniform-crime-reporting-data>
+You can download the data here: <https://data.wprdc.org/dataset/uniform-crime-reporting-data>
 
 We will be using the following R packages for this analysis
 
@@ -23,7 +21,9 @@ Install these packages using the following code
 
 Then load the packages
 
-    library(tidyverse)
+``` r
+library(tidyverse)
+```
 
     ## Loading tidyverse: ggplot2
     ## Loading tidyverse: tibble
@@ -37,7 +37,9 @@ Then load the packages
     ## filter(): dplyr, stats
     ## lag():    dplyr, stats
 
-    library(lubridate)
+``` r
+library(lubridate)
+```
 
     ## 
     ## Attaching package: 'lubridate'
@@ -46,12 +48,16 @@ Then load the packages
     ## 
     ##     date
 
-    library(viridis)
-    library(ggmap)
+``` r
+library(viridis)
+library(ggmap)
+```
 
 First, we need to read the data into R
 
-    df <- read_csv("archive-police-blotter.csv")
+``` r
+df <- read_csv("archive-police-blotter.csv")
+```
 
     ## Parsed with column specification:
     ## cols(
@@ -80,54 +86,62 @@ First, we need to read the data into R
     ## ...... ... ...................... .......
     ## See problems(...) for more details.
 
-readr tells us how it interpreted the column classes, and alerted us
-that it was unable to load 6 rows from the data
+readr tells us how it interpreted the column classes, and alerted us that it was unable to load 6 rows from the data
 
 Next, we will change the column names so they are easier to work with
 
-    colnames(df) <- tolower(colnames(df))
+``` r
+colnames(df) <- tolower(colnames(df))
+```
 
 Then, rename the column names
 
-    df <- df %>% 
-      rename(date_time = incidenttime,
-             location = incidentlocation,
-             cleared_flag = clearedflag,
-             neighborhood = incidentneighborhood,
-             zone = incidentzone,
-             description = hierarchydesc,
-             tract = incidenttract)
+``` r
+df <- df %>% 
+  rename(date_time = incidenttime,
+         location = incidentlocation,
+         cleared_flag = clearedflag,
+         neighborhood = incidentneighborhood,
+         zone = incidentzone,
+         description = hierarchydesc,
+         tract = incidenttract)
+```
 
-Next, we will use lubridate to change the relevant columns to dates and
-times
+Next, we will use lubridate to change the relevant columns to dates and times
 
-    df <- df %>%
-      mutate(date_time = mdy_hm(date_time),
-             date = ymd(substr(date_time, 1, 10)),
-             year = year(date),
-             month = month(date, label = TRUE),
-             wday = wday(date, label = TRUE),
-             mday = mday(date))
+``` r
+df <- df %>%
+  mutate(date_time = mdy_hm(date_time),
+         date = ymd(substr(date_time, 1, 10)),
+         year = year(date),
+         month = month(date, label = TRUE),
+         wday = wday(date, label = TRUE),
+         mday = mday(date))
+```
 
 Now we will reorder the columns and select the ones we want to work with
 
-    df <- df %>% 
-      select(date, 
-             year,
-             month,
-             wday,
-             mday,
-             location,
-             neighborhood,
-             zone,
-             description,
-             cleared_flag,
-             x,
-             y)
+``` r
+df <- df %>% 
+  select(date, 
+         year,
+         month,
+         wday,
+         mday,
+         location,
+         neighborhood,
+         zone,
+         description,
+         cleared_flag,
+         x,
+         y)
+```
 
 Let's see how the data look now
 
-    glimpse(df)
+``` r
+glimpse(df)
+```
 
     ## Observations: 495,251
     ## Variables: 12
@@ -146,10 +160,12 @@ Let's see how the data look now
 
 Which zone has the most arrests?
 
-    df %>%
-      group_by(zone) %>% 
-      count() %>% 
-      arrange(-n)
+``` r
+df %>%
+  group_by(zone) %>% 
+  count() %>% 
+  arrange(-n)
+```
 
     ## # A tibble: 16 × 2
     ##         zone      n
@@ -173,8 +189,10 @@ Which zone has the most arrests?
 
 Before we start making plots, we will load my custom theme
 
-    source("https://raw.githubusercontent.com/conorotompkins/AdjGSAA/master/graphs/theme_nhh.R")
-    theme_set(theme_nhh())
+``` r
+source("https://raw.githubusercontent.com/conorotompkins/AdjGSAA/master/graphs/theme_nhh.R")
+theme_set(theme_nhh())
+```
 
     ## Warning: `panel.margin` is deprecated. Please use `panel.spacing` property
     ## instead
@@ -190,30 +208,34 @@ Before we start making plots, we will load my custom theme
 
 How has the number of arrests changed over time?
 
-    df %>% 
-      filter(zone %in% c(1:6)) %>% 
-      group_by(zone, date) %>% 
-      count() %>% 
-      ggplot(aes(date, n, color = zone, fill = zone)) +
-      #geom_point(alpha = .02) +
-      geom_smooth() +
-      #facet_wrap(~month, ncol = 1) +
-      scale_fill_viridis(discrete = TRUE) +
-      scale_color_viridis(discrete = TRUE) +
-      coord_cartesian(ylim = c(0, 60))
+``` r
+df %>% 
+  filter(zone %in% c(1:6)) %>% 
+  group_by(zone, date) %>% 
+  count() %>% 
+  ggplot(aes(date, n, color = zone, fill = zone)) +
+  #geom_point(alpha = .02) +
+  geom_smooth() +
+  #facet_wrap(~month, ncol = 1) +
+  scale_fill_viridis(discrete = TRUE) +
+  scale_color_viridis(discrete = TRUE) +
+  coord_cartesian(ylim = c(0, 60))
+```
 
     ## `geom_smooth()` using method = 'gam'
 
-![](Exploratory_Analysis_files/figure-markdown_strict/arrests%20over%20time-1.png)
+![](Exploratory_Analysis_files/figure-markdown_github/arrests%20over%20time-1.png)
 
 Looks like there is a data or reporting problem in Zone 6
 
 Which neighborhood has the most arrests?
 
-    df %>%
-      group_by(neighborhood) %>% 
-      count() %>% 
-      arrange(-n)
+``` r
+df %>%
+  group_by(neighborhood) %>% 
+  count() %>% 
+  arrange(-n)
+```
 
     ## # A tibble: 95 × 2
     ##                   neighborhood     n
@@ -232,11 +254,13 @@ Which neighborhood has the most arrests?
 
 Which arrest descriptions are the most common?
 
-    df %>%
-      #filter(incident_zone == 2) %>% 
-      group_by(description) %>% 
-      count() %>% 
-      arrange(-n)
+``` r
+df %>%
+  #filter(incident_zone == 2) %>% 
+  group_by(description) %>% 
+  count() %>% 
+  arrange(-n)
+```
 
     ## # A tibble: 330 × 2
     ##                       description      n
@@ -259,28 +283,32 @@ Have the number of marijuana-related arrests changed over time?
 
 Create a dataframe
 
-    pot_arrests <- df %>%
-      filter(grepl("MARIJUANA", description) == TRUE) %>%
-      group_by(date) %>% 
-      count() 
+``` r
+pot_arrests <- df %>%
+  filter(grepl("MARIJUANA", description) == TRUE) %>%
+  group_by(date) %>% 
+  count() 
 
-    #Plot the data
-    ggplot(data = pot_arrests, aes(x = date, y = n)) +
-      geom_smooth()
+#Plot the data
+ggplot(data = pot_arrests, aes(x = date, y = n)) +
+  geom_smooth()
+```
 
     ## `geom_smooth()` using method = 'gam'
 
-![](Exploratory_Analysis_files/figure-markdown_strict/marijuana%20arrests-1.png)
+![](Exploratory_Analysis_files/figure-markdown_github/marijuana%20arrests-1.png)
 
 Let's look at how the data looks on a map
 
 First, create the map
 
-    city_map <-  get_map(location = "Oakland, Pittsburgh, PA",
-                   zoom = 12,
-                   maptype = "toner", 
-                   source = "stamen",
-                   messaging = FALSE)
+``` r
+city_map <-  get_map(location = "Oakland, Pittsburgh, PA",
+               zoom = 12,
+               maptype = "toner", 
+               source = "stamen",
+               messaging = FALSE)
+```
 
     ## Map from URL : http://maps.googleapis.com/maps/api/staticmap?center=Oakland,+Pittsburgh,+PA&zoom=12&size=640x640&scale=2&maptype=terrain&sensor=false
 
@@ -312,33 +340,39 @@ First, create the map
 
 View the map to make sure it looks right
 
-    ggmap(city_map)
+``` r
+ggmap(city_map)
+```
 
-![](Exploratory_Analysis_files/figure-markdown_strict/view%20map-1.png)
+![](Exploratory_Analysis_files/figure-markdown_github/view%20map-1.png)
 
 Filter out data that is not in one of the six police zones
 
-    df_map <- df %>% 
-      filter(zone %in% c(1:6))
+``` r
+df_map <- df %>% 
+  filter(zone %in% c(1:6))
+```
 
-    ggmap(city_map) +
-      stat_density_2d(data = df_map, #Using a 2d contour
-                      aes(x, #longitude
-                          y, #latitude
-                          fill = ..level.., #Use the count of arrests as the fill
-                          alpha = .5), #Use alpha so you can see the map under the data
-                      geom = "polygon") + #We want the contour in a polygon
-      #facet_wrap(~wday, nrow = 2) +
-      scale_fill_viridis() +
-      guides(alpha = FALSE,
-             fill = guide_colorbar("Count of Arrests")) +
-      labs(x = "",
-           y = "") +
-      #theme_nhh() +
-      theme(axis.text = element_blank(),
-            legend.position = "bottom",
-            legend.direction = "horizontal")
+``` r
+ggmap(city_map) +
+  stat_density_2d(data = df_map, #Using a 2d contour
+                  aes(x, #longitude
+                      y, #latitude
+                      fill = ..level.., #Use the count of arrests as the fill
+                      alpha = .5), #Use alpha so you can see the map under the data
+                  geom = "polygon") + #We want the contour in a polygon
+  #facet_wrap(~wday, nrow = 2) +
+  scale_fill_viridis() +
+  guides(alpha = FALSE,
+         fill = guide_colorbar("Count of Arrests")) +
+  labs(x = "",
+       y = "") +
+  #theme_nhh() +
+  theme(axis.text = element_blank(),
+        legend.position = "bottom",
+        legend.direction = "horizontal")
+```
 
     ## Warning: Removed 29005 rows containing non-finite values (stat_density2d).
 
-![](Exploratory_Analysis_files/figure-markdown_strict/plot%20map-1.png)
+![](Exploratory_Analysis_files/figure-markdown_github/plot%20map-1.png)
