@@ -139,3 +139,11 @@ city_map +
   theme(legend.position = "bottom",
         legend.direction = "horizontal")
 
+df %>% 
+  group_by(mday, wday) %>% 
+  count() %>% 
+  ggplot(aes(mday, wday, fill = n)) +
+  geom_tile() +
+  coord_equal() +
+  scale_fill_viridis()
+
