@@ -16,8 +16,9 @@ We will be using the following R packages for this analysis
 
 Install these packages using the following code
 
-`{r} #install.packages(c("tidyverse", "lubridate", "viridis", "ggmap"), repos = ) #`
-====================================================================================
+``` r
+install.packages(c("tidyverse", "lubridate", "viridis", "ggmap"))
+```
 
 Then load the packages
 
