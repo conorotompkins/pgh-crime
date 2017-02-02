@@ -33,12 +33,14 @@ df <- df %>%
          year = year(date),
          month = month(date, label = TRUE),
          wday = wday(date, label = TRUE),
-         mday = mday(date)) %>% 
+         mday = mday(date),
+         hour = hour(date_time)) %>% 
   select(date, #select the columnns we want
          year,
          month,
          wday,
          mday,
+         hour,
          location,
          neighborhood,
          zone,
@@ -46,6 +48,9 @@ df <- df %>%
          cleared_flag,
          x,
          y)
+
+df <- df %>%
+  mutate(wday = factor(wday, levels = c("Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun")))
 
 glimpse(df) #View the data
 
@@ -110,22 +115,36 @@ pot_arrests <- df %>%
 ggplot(data = pot_arrests, aes(x = date, y = n)) +
   geom_smooth()
 
+df %>% 
+  group_by(month, wday) %>% 
+  count() %>% 
+  ggplot(aes(month, wday, fill = n)) +
+  geom_tile() +
+  coord_equal() +
+  scale_x_discrete(expand = c(0,0)) +
+  scale_y_discrete(expand = c(0,0),
+                   limits = rev(levels(df$wday))) +
+  scale_fill_viridis()
+
+
 #Let's look at how the data looks on a map
 #First, create the map
-city_map <-  qmap("North Oakland, Pittsburgh, PA", 
+city_map <-  get_map("North Oakland, Pittsburgh, PA", 
                   zoom = 12,
                   maptype = "toner", 
                   source = "stamen")
 
 #View the map to make sure it looks right
-city_map
+ggmap(city_map)
+
+city_map <- ggmap(city_map)
 
 #Filter out data that is not in one of the six police zones
 df_map <- df %>% 
   filter(zone %in% c(1:6))
 
 #Put the data on the map
-city_map +
+ggmap(city_map) +
   stat_density_2d(data = df_map, #Using a 2d contour
                   aes(x, #longitude
                       y, #latitude
@@ -139,11 +158,38 @@ city_map +
   theme(legend.position = "bottom",
         legend.direction = "horizontal")
 
-df %>% 
-  group_by(mday, wday) %>% 
-  count() %>% 
-  ggplot(aes(mday, wday, fill = n)) +
-  geom_tile() +
-  coord_equal() +
-  scale_fill_viridis()
+df_map_zones <- df %>% 
+  filter(zone %in% c(1:6)) %>% 
+  select(zone, x, y) %>% 
+  mutate(zone = as.factor(paste("Zone:", zone)))
+
+faceted_zone_map <- city_map +
+  geom_point(data = df_map_zones, aes(x, y, color = zone), alpha = .3, size = 1) +
+  facet_wrap(~zone, nrow = 2) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+        x = NULL,
+       y = NULL) +
+  guides(alpha = FALSE,
+         color = FALSE) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text = element_blank())
+faceted_zone_map
+ggsave("faceted_zone_map.png", faceted_zone_map, width = 16, height = 9)
+
+
+zone_map <- city_map +
+  geom_point(data = df_map_zones, aes(x, y, color = as.factor(zone)), alpha = .3, size = .7) +
+  scale_color_viridis(discrete = TRUE) +
+  guides(alpha = FALSE,
+         fill = guide_colorbar("Count of Arrests")) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal")
+  
+
+
+
+
+
 
