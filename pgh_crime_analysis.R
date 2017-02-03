@@ -182,14 +182,57 @@ ggsave("faceted_zone_map.png", faceted_zone_map, width = 16, height = 9)
 zone_map <- city_map +
   geom_point(data = df_map_zones, aes(x, y, color = as.factor(zone)), alpha = .3, size = .7) +
   scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+       x = NULL,
+       y = NULL) +
   guides(alpha = FALSE,
          fill = guide_colorbar("Count of Arrests")) +
   theme(legend.position = "bottom",
-        legend.direction = "horizontal")
+        legend.direction = "horizontal",
+        axis.text = element_blank())
   
 
+neighborhoods_top10 <- df %>% 
+  filter(!is.na(neighborhood)) %>% 
+  select(neighborhood, x, y) %>% 
+  group_by(neighborhood) %>% 
+  count() %>%
+  arrange(-n) %>% 
+  mutate(neighborhood = factor(neighborhood)) %>% 
+  top_n(n = 10, wt = n)
 
+df_nbh <- df %>% 
+  filter(neighborhood %in% neighborhoods_top10$neighborhood) %>% 
+  select(neighborhood, x, y) %>% 
+  mutate(neighborhood = factor(neighborhood, levels = neighborhoods_top10$neighborhood))
 
+nbh_map <- city_map +
+  geom_point(data = df_nbh, aes(x, y, color = neighborhood), alpha = .3, size = 1) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+       x = NULL,
+       y = NULL) +
+  guides(alpha = FALSE,
+         fill = guide_colorbar("Count of Arrests")) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text = element_blank())
+nbh_map
 
+nbh_map_faceted <- city_map +
+  geom_point(data = df_nbh, aes(x, y, color = neighborhood), alpha = .3, size = 1) +
+  facet_wrap(~neighborhood, ncol = 5) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+     x = NULL,
+     y = NULL) +
+  guides(alpha = FALSE,
+         fill = guide_colorbar("Count of Arrests")) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text = element_blank())
+nbh_map_faceted
+
+write_csv(df_nbh, "nbh_map_df.csv")
 
 
