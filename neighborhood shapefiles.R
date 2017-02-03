@@ -1,20 +1,17 @@
-library(ggplot2)
+library(tidyverse)
 library(maptools)
 library(rgeos)
-library(Cairo)
 library(ggmap)
 library(scales)
-library(RColorBrewer)
 set.seed(8000)
 
-install.packages(c("maptools", "rgeos", "Cairo"))
+source("https://raw.githubusercontent.com/conorotompkins/AdjGSAA/master/graphs/theme_nhh.R")
 
 setwd("C:/Users/conor/githubfolder/pgh-crime/shapefiles/Pittsburgh_Neighborhoods")
 neighborhoods.shp <- readShapeSpatial("Pittsburgh_Neighborhoods.shp")
-class(neighborhoods.shp)
-names(neighborhoods.shp)
-print(neighborhoods.shp$hood)
-
+#class(neighborhoods.shp)
+#names(neighborhoods.shp)
+#print(neighborhoods.shp$hood)
 
 df_nbh <- df %>% 
   select(neighborhood) %>% 
@@ -37,7 +34,15 @@ ggplot() +
                aes(x = long, y = lat, group = group, fill = n), 
                color = "black", size = 0.25) + 
   coord_map() +
-  scale_fill_viridis()
+  scale_fill_viridis() +
+  labs(title = "Pittsburgh Crime Incident Data",
+       x = NULL,
+       y = NULL) +
+  guides(fill = guide_colorbar("Count of Arrests")) +
+  theme(axis.text = element_blank(),
+        panel.grid = element_blank())
+
+?theme
 
 #problems
-#in the crim incident db, downtown is called "Golden Triangle/Civic Arena". It's called "Central Business District" in the shapefile
+#in the crime incident db, downtown is called "Golden Triangle/Civic Arena". It's called "Central Business District" in the shapefile
