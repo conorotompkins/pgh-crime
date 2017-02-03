@@ -144,7 +144,7 @@ df_map <- df %>%
   filter(zone %in% c(1:6))
 
 #Put the data on the map
-ggmap(city_map) +
+city_map +
   stat_density_2d(data = df_map, #Using a 2d contour
                   aes(x, #longitude
                       y, #latitude
@@ -232,6 +232,7 @@ nbh_map_faceted <- city_map +
         legend.direction = "horizontal",
         axis.text = element_blank())
 nbh_map_faceted
+#there appears to be a pattern in the error in the data. looks like the same arrests could have been reported across multiple neighborhoods. I'm assuming each incident is unique.
 
 write_csv(df_nbh, "nbh_map_df.csv")
 
