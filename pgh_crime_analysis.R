@@ -6,6 +6,7 @@ library(tidyverse)
 library(lubridate)
 library(viridis)
 library(ggmap)
+library(scales)
 
 theme_set(theme_nhh())
 
@@ -206,14 +207,16 @@ df_nbh <- df %>%
   select(neighborhood, x, y) %>% 
   mutate(neighborhood = factor(neighborhood, levels = neighborhoods_top10$neighborhood))
 
+write_csv(df_nbh, "nbh_map_df.csv")
+
 nbh_map <- city_map +
-  geom_point(data = df_nbh, aes(x, y, color = neighborhood), alpha = .3, size = 1) +
+  geom_point(data = df_nbh, aes(x, y, color = neighborhood), alpha = .3, size = 2) +
   scale_color_viridis(discrete = TRUE) +
   labs(title = "Pittsburgh Crime Incident Data",
        x = NULL,
        y = NULL) +
   guides(alpha = FALSE,
-         fill = guide_colorbar("Count of Arrests")) +
+         color = FALSE) +
   theme(legend.position = "bottom",
         legend.direction = "horizontal",
         axis.text = element_blank())
@@ -234,6 +237,48 @@ nbh_map_faceted <- city_map +
 nbh_map_faceted
 #there appears to be a pattern in the error in the data. looks like the same arrests could have been reported across multiple neighborhoods. I'm assuming each incident is unique.
 
-write_csv(df_nbh, "nbh_map_df.csv")
+#identify the correct zones for neighborhoods by finding the zones with the highest # of incidents for a neighborhood
+df_correct_zone <- df %>% 
+  mutate(key = paste(zone, neighborhood)) %>% 
+  select(key, zone, neighborhood) %>% 
+  group_by(key, zone, neighborhood) %>%
+  count() %>% 
+  arrange(neighborhood, -n) %>% 
+  group_by(neighborhood) %>% 
+  slice(1) %>% 
+  ungroup() %>% 
+  arrange(zone) %>% 
+  mutate(correct_zone = zone) %>% 
+  select(correct_zone, neighborhood)
 
+#calculate how many of a neighborhood's incidents were reported in the correct zone
+df_zones_nbh <- df %>% 
+  mutate(key = paste(zone, neighborhood)) %>% 
+  select(key, zone, neighborhood) %>% 
+  filter(!is.na(zone),
+         !is.na(neighborhood),
+         !(zone %in% c("OSC", "OUTSIDE")),
+         !(neighborhood %in% c("Outside State", "Outside County", "Outside City"))) %>% 
+  group_by(key, zone, neighborhood) %>%
+  count() %>% 
+  left_join(., df_correct_zone) %>% 
+  mutate(flag = ifelse(zone == correct_zone, "Correct", "Incorrect")) %>% 
+  group_by(zone, neighborhood, flag) %>% 
+  summarize(n = sum(n)) %>% 
+  spread(key = flag,
+         value = n,
+         fill = 0) %>% 
+  group_by(neighborhood) %>% 
+  summarize(Correct = sum(Correct),
+            Incorrect = sum(Incorrect),
+            count = Correct + Incorrect,
+            percent_correct = round(Correct/count, 2)) %>% 
+  left_join(., df_correct_zone)
 
+ggplot(df_zones_nbh, aes(count, percent_correct, label = neighborhood, fill = correct_zone)) +
+  geom_label() +
+  scale_y_continuous(labels = percent) +
+  labs(x = "Count of Arrest Incidents",
+       y = "Percent Reported in Correct Zone",
+       title = "Nieghborhood-Zone Reporting Analysis") +
+  guides(fill = guide_legend(title = "Correct Zone"))
