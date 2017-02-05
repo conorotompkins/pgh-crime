@@ -7,6 +7,7 @@ library(lubridate)
 library(viridis)
 library(ggmap)
 library(scales)
+library(forcats)
 
 theme_set(theme_nhh())
 
@@ -282,3 +283,76 @@ ggplot(df_zones_nbh, aes(count, percent_correct, label = neighborhood, fill = co
        y = "Percent Reported in Correct Zone",
        title = "Nieghborhood-Zone Reporting Analysis") +
   guides(fill = guide_legend(title = "Correct Zone"))
+
+
+#what are the drivers of the incorrect assignments
+#create helper factor for neighborhood
+df_bad_zones_helper1 <- df %>% 
+  mutate(key = paste(zone, neighborhood)) %>% 
+  select(key, zone, neighborhood) %>% 
+  filter(!is.na(zone),
+         !is.na(neighborhood),
+         (zone %in% 1:6),
+         !(neighborhood %in% c("Outside State", "Outside County", "Outside City"))) %>% 
+  group_by(key, zone, neighborhood) %>%
+  count() %>% 
+  left_join(., df_correct_zone) %>% 
+  mutate(flag = ifelse(zone == correct_zone, "Correct", "Incorrect")) %>% 
+  group_by(zone, neighborhood, flag) %>% 
+  summarize(n = sum(n)) %>% 
+  filter(flag == "Incorrect") %>% 
+  group_by(neighborhood) %>% 
+  summarize(n = sum(n)) %>% 
+  arrange(n)
+
+#create helper factor for zone
+df_bad_zones_helper2 <- df %>% 
+  mutate(key = paste(zone, neighborhood)) %>% 
+  select(key, zone, neighborhood) %>% 
+  filter(!is.na(zone),
+         !is.na(neighborhood),
+         (zone %in% 1:6),
+         !(neighborhood %in% c("Outside State", "Outside County", "Outside City"))) %>% 
+  group_by(key, zone, neighborhood) %>%
+  count() %>% 
+  left_join(., df_correct_zone) %>% 
+  mutate(flag = ifelse(zone == correct_zone, "Correct", "Incorrect")) %>% 
+  group_by(zone, neighborhood, flag) %>% 
+  summarize(n = sum(n)) %>% 
+  filter(flag == "Incorrect") %>% 
+  group_by(zone) %>% 
+  summarize(n = sum(n)) %>% 
+  arrange(-n)
+
+#create df for incorrect assignments
+df_bad_zones <- df %>% 
+  mutate(key = paste(zone, neighborhood)) %>% 
+  select(key, zone, neighborhood) %>% 
+  filter(!is.na(zone),
+         !is.na(neighborhood),
+         (zone %in% 1:6),
+         !(neighborhood %in% c("Outside State", "Outside County", "Outside City"))) %>% 
+  group_by(key, zone, neighborhood) %>%
+  count() %>% 
+  left_join(., df_correct_zone) %>% 
+  mutate(flag = ifelse(zone == correct_zone, "Correct", "Incorrect")) %>% 
+  group_by(zone, neighborhood, flag) %>% 
+  summarize(n = sum(n)) %>% 
+  filter(flag == "Incorrect") %>% 
+  ungroup() %>% 
+  mutate(zone = factor(zone, levels = df_bad_zones_helper2$zone),
+         neighborhood = factor(neighborhood, levels = df_bad_zones_helper1$neighborhood))
+
+#create heatmap for incorrect assigments
+ggplot(df_bad_zones, aes(zone, neighborhood, fill = n)) +
+  geom_tile() +
+  coord_equal() +
+  scale_fill_viridis() +
+  theme(panel.grid = element_blank()) +
+  scale_y_discrete(expand = c(0,0)) +
+  scale_x_discrete(expand = c(0,0)) +
+  labs(x = "Zone",
+       y = "Neighborhood",
+       title = "Incorrect Neighborhood-Zone Assignments") +
+  guides(fill = guide_colorbar("Count of Incidents")) +
+  theme(axis.text = element_text(size = 8))
