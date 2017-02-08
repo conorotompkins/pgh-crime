@@ -9,9 +9,12 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+tidy = TRUE
 ```
 
 ```{r load libraries, echo = FALSE}
+library(rmarkdown)
+library(knitr)
 library(tidyverse)
 library(lubridate)
 library(viridis)
@@ -285,7 +288,8 @@ ggplot(df_zone_nbh, aes(zone, reorder(neighborhood, n), fill = n)) +
   scale_y_discrete(expand = c(0,0)) +
   theme(axis.text = element_text(size = 8),
         strip.text = element_text(size = 8),
-        panel.grid = element_blank())
+        panel.grid = element_blank(),
+        aspect.ratio= 12/1)
 ```
 
   

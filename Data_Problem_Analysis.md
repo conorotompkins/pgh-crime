@@ -433,7 +433,8 @@ ggplot(df_zone_nbh, aes(zone, reorder(neighborhood, n), fill = n)) +
   scale_y_discrete(expand = c(0,0)) +
   theme(axis.text = element_text(size = 8),
         strip.text = element_text(size = 8),
-        panel.grid = element_blank())
+        panel.grid = element_blank(),
+        aspect.ratio= 12/1)
 ```
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/zone%20vs%20nbh%20plot-1.png)
