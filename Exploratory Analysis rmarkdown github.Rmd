@@ -208,7 +208,5 @@ ggmap(city_map) +
   labs(x = "",
        y = "") +
   theme_nhh() +
-  theme(axis.text = element_blank(),
-        legend.position = "bottom",
-        legend.direction = "horizontal")
+  theme(axis.text = element_blank())
 ```

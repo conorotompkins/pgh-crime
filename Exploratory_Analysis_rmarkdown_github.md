@@ -378,7 +378,7 @@ ggmap(city_map) +
   stat_density_2d(data = df_map, #Using a 2d contour
                   aes(x, #longitude
                       y, #latitude
-                      fill = ..level.., #Use the count of arrests as the fill
+                      fill = ..level.., #Use the level of arrests as the fill
                       alpha = .5), #Use alpha so you can see the map under the data
                   geom = "polygon") + #We want the contour in a polygon
   scale_fill_viridis() +
@@ -387,9 +387,7 @@ ggmap(city_map) +
   labs(x = "",
        y = "") +
   theme_nhh() +
-  theme(axis.text = element_blank(),
-        legend.position = "bottom",
-        legend.direction = "horizontal")
+  theme(axis.text = element_blank())
 ```
 
     ## Warning: `panel.margin` is deprecated. Please use `panel.spacing` property
