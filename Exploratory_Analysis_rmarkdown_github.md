@@ -54,7 +54,11 @@ library(viridis)
 library(ggmap)
 ```
 
-First, we need to read the data into R
+Set your working directory
+
+<http://rprogramming.net/set-working-directory-in-r/>
+
+Then, read the data into R
 
 ``` r
 df <- read_csv("archive-police-blotter.csv")
@@ -87,7 +91,7 @@ df <- read_csv("archive-police-blotter.csv")
     ## ...... ... ...................... .......
     ## See problems(...) for more details.
 
-readr tells us how it interpreted the column classes, and alerted us that it was unable to load 6 rows from the data
+readr::read\_csv tells us how it interpreted the column classes, and alerted us that it was unable to load 6 rows from the data
 
 Next, we will change the column names so they are easier to work with
 
@@ -217,8 +221,7 @@ df %>%
   ggplot(aes(date, n, color = zone, fill = zone)) +
   geom_smooth() +
   scale_fill_viridis(discrete = TRUE) +
-  scale_color_viridis(discrete = TRUE) +
-  coord_cartesian(ylim = c(0, 60))
+  scale_color_viridis(discrete = TRUE)
 ```
 
     ## `geom_smooth()` using method = 'gam'
@@ -241,8 +244,7 @@ df %>%
   ggplot(aes(date, n, color = zone, fill = zone)) +
   geom_smooth() +
   scale_fill_viridis(discrete = TRUE) +
-  scale_color_viridis(discrete = TRUE) +
-  coord_cartesian(ylim = c(0, 60))
+  scale_color_viridis(discrete = TRUE)
 ```
 
     ## `geom_smooth()` using method = 'gam'
