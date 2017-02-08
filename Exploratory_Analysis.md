@@ -17,7 +17,7 @@ We will be using the following R packages for this analysis
 Install these packages using the following code
 
 ``` r
-install.packages(c("tidyverse", "lubridate", "viridis", "ggmap"))
+#install.packages(c("tidyverse", "lubridate", "viridis", "ggmap"), repos = )
 ```
 
 Then load the packages
@@ -229,6 +229,30 @@ df %>%
 
 Looks like there is a data or reporting problem in Zone 6
 
+Bob Gradeck pointed out that Zone 6 was closed in 2003 and reopened in 2008
+
+<http://www.post-gazette.com/local/neighborhoods/2008/03/31/Police-manpower-tipped-to-West-End-s-Zone-6/stories/200803310145>
+
+What does the trend look like if we just look at incidents since 2008?
+
+``` r
+df %>% 
+  filter(zone %in% c(1:6), year >= 2008) %>% 
+  group_by(zone, date) %>% 
+  count() %>% 
+  ggplot(aes(date, n, color = zone, fill = zone)) +
+  #geom_point(alpha = .02) +
+  geom_smooth() +
+  #facet_wrap(~month, ncol = 1) +
+  scale_fill_viridis(discrete = TRUE) +
+  scale_color_viridis(discrete = TRUE) +
+  coord_cartesian(ylim = c(0, 60))
+```
+
+    ## `geom_smooth()` using method = 'gam'
+
+![](Exploratory_Analysis_files/figure-markdown_github/arrests%20over%20time%202008-1.png)
+
 Which neighborhood has the most arrests?
 
 ``` r
@@ -278,11 +302,9 @@ df %>%
     ## 10              MARIJUANA-POSSESS  11666
     ## # ... with 320 more rows
 
-Many NA values
+Looks like there are many NA values
 
 Have the number of marijuana-related arrests changed over time?
-
-Create a dataframe
 
 ``` r
 pot_arrests <- df %>%
@@ -368,11 +390,17 @@ ggmap(city_map) +
          fill = guide_colorbar("Count of Arrests")) +
   labs(x = "",
        y = "") +
-  #theme_nhh() +
+  theme_nhh() +
   theme(axis.text = element_blank(),
         legend.position = "bottom",
         legend.direction = "horizontal")
 ```
+
+    ## Warning: `panel.margin` is deprecated. Please use `panel.spacing` property
+    ## instead
+
+    ## Warning: `legend.margin` must be specified using `margin()`. For the old
+    ## behavior use legend.spacing
 
     ## Warning: Removed 29005 rows containing non-finite values (stat_density2d).
 
