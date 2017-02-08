@@ -1,0 +1,262 @@
+---
+title: "Analysis of Potential Data Problems in Pittsburgh Police Incident Blotter Archive"
+author: "Conor Tompkins"
+date: "February 8, 2017"
+output:
+  md_document:
+    variant: markdown_github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load libraries, echo = FALSE}
+library(tidyverse)
+library(lubridate)
+library(viridis)
+library(ggmap)
+```
+
+```{r load custom theme, echo = FALSE}
+source("https://raw.githubusercontent.com/conorotompkins/AdjGSAA/master/graphs/theme_nhh.R")
+theme_set(theme_nhh())
+```
+
+This is an analysis of potential data problems in the Pittsburgh Police Incident Blotter Archive.
+
+```{r read data into r, echo = FALSE}
+df <- read_csv("archive-police-blotter.csv")
+```
+
+```{r lower case column names, echo = FALSE}
+colnames(df) <- tolower(colnames(df))
+```
+
+```{r rename columnn names, echo = FALSE}
+df <- df %>% 
+  rename(date_time = incidenttime,
+         location = incidentlocation,
+         cleared_flag = clearedflag,
+         neighborhood = incidentneighborhood,
+         zone = incidentzone,
+         description = hierarchydesc,
+         tract = incidenttract)
+```
+
+```{r lubridate column names, echo = FALSE}
+df <- df %>%
+  mutate(date_time = mdy_hm(date_time),
+         date = ymd(substr(date_time, 1, 10)),
+         year = year(date),
+         month = month(date, label = TRUE),
+         wday = wday(date, label = TRUE),
+         mday = mday(date))
+```         
+
+```{r reorder column names, echo = FALSE}
+df <- df %>% 
+  select(date, 
+         year,
+         month,
+         wday,
+         mday,
+         location,
+         neighborhood,
+         zone,
+         description,
+         cleared_flag,
+         x,
+         y)
+```        
+
+#Zone 6
+
+Zone 6 was closed in 2003, and reopened in 2008. 
+
+http://www.post-gazette.com/local/neighborhoods/2008/03/31/Police-manpower-tipped-to-West-End-s-Zone-6/stories/200803310145
+
+Therefore, we should expect that there are 0 incidents between 2005 (when the data begins) and 2008
+
+```{r zone incident count}
+df %>%
+  filter(zone == 6, year <= 2008) %>% 
+  select(zone, date, description) %>% 
+  group_by(zone) %>% 
+  count()
+```
+
+```{r zone incident head}
+df %>%
+  filter(zone == 6, year <= 2008) %>% 
+  select(zone, date, description) %>% 
+  head()
+```
+
+Where did this incidents occur?
+
+```{r create z6 map}
+z6_map <-  get_map(location = "Mount Washington, Pittsburgh, PA",
+               zoom = 12,
+               maptype = "toner", 
+               source = "stamen",
+               messaging = FALSE)
+```
+
+```{r filter map data}
+df_map_z6 <- df %>% 
+  filter(zone == 6, year <= 2008)
+```
+
+```{r plot map}
+ggmap(z6_map) +
+  stat_density_2d(data = df_map_z6, #Using a 2d contour
+                  aes(x, #longitude
+                      y, #latitude
+                      fill = ..level.., #Use the count of incidents as the fill
+                      alpha = .5), #Use alpha so you can see the map under the data
+                  geom = "polygon") + #We want the contour in a polygon
+  scale_fill_viridis() +
+  guides(alpha = FALSE,
+         fill = guide_colorbar("Count of Incidents")) +
+  labs(x = "",
+       y = "",
+       title = "Zone 6 Incidents before 2008") +
+  theme_nhh() +
+  theme(axis.text = element_blank())
+```
+
+This broadly lines up with the borders of Zone 6
+
+Incidents reported in Zone 6 before Zone 6 was reopened in 2008 appear to be geolocated appropriately
+
+#Zone reporting consistency
+
+Does the Zone the incident is assigned to match the geolocations the incident is reported at?
+```{r zone map}
+city_map +
+  geom_point(data = df_map_zones, aes(x, y, color = zone), alpha = .3, size = 1) +
+  facet_wrap(~zone, nrow = 2) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+        x = NULL,
+       y = NULL) +
+  guides(alpha = FALSE,
+         color = FALSE) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text = element_blank())
+```
+
+```{r create city map 11}
+city_map_11 <-  get_map(location = "Oakland, Pittsburgh, PA",
+               zoom = 11,
+               maptype = "toner", 
+               source = "stamen",
+               messaging = FALSE)
+
+city_map_11 <- ggmap(city_map_11)
+```
+
+```{r create zone map df}
+df_map_zones <- df %>% 
+  filter(zone %in% c(1:6)) %>% 
+  select(zone, x, y) %>% 
+  mutate(zone = as.factor(paste("Zone:", zone)))
+```
+
+In this veiw, the data looks accurate
+```{r create zone map}
+city_map_11 +
+  geom_point(data = df_map_zones, aes(x, y, color = as.factor(zone)), alpha = .3, size = .7) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Police Incident Data",
+       x = NULL,
+       y = NULL) +
+  guides(fill = guide_legend(title = NULL)) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text = element_blank())
+#fix fill guide
+```
+
+
+```{r create city map 12}
+city_map_12 <-  get_map(location = "Oakland, Pittsburgh, PA",
+               zoom = 12,
+               maptype = "toner", 
+               source = "stamen",
+               messaging = FALSE)
+
+city_map_12 <- ggmap(city_map_12)
+```
+
+
+However, when you facet the data by Zone to separate it, the data looks less accurate
+```{r faceted zone map}
+city_map_12 +
+  geom_point(data = df_map_zones, aes(x, y, color = zone), alpha = .3, size = 1) +
+  facet_wrap(~zone, nrow = 2) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+        x = NULL,
+       y = NULL) +
+  guides(alpha = FALSE,
+         color = FALSE) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text = element_blank())
+```
+
+#Neighborhood reporting consistency
+
+Does the data for the Neighborhoods look the same?
+```{r get top 10 neighborhoods}
+neighborhoods_top10 <- df %>% 
+  filter(!is.na(neighborhood)) %>% 
+  select(neighborhood) %>% 
+  group_by(neighborhood) %>% 
+  count() %>%
+  arrange(-n) %>% 
+  mutate(neighborhood = factor(neighborhood)) %>% 
+  top_n(n = 10, wt = n)
+
+df_nbh <- df %>% 
+  filter(neighborhood %in% neighborhoods_top10$neighborhood) %>% 
+  select(neighborhood, x, y) %>% 
+  mutate(neighborhood = factor(neighborhood, levels = neighborhoods_top10$neighborhood))
+```
+
+Looking at the data from the top 10 Neighborhoods in one map:
+```{r nbh map}
+city_map +
+  geom_point(data = df_nbh, aes(x, y, color = neighborhood), alpha = .3, size = 1) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Police Incident Data",
+       x = NULL,
+       y = NULL) +
+  guides(alpha = FALSE,
+         color = FALSE) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text = element_blank())
+```
+
+The borders between Neighborhoods are significantly less clearly delineated than the borders for the Zones were
+
+How does the data look when it is faceted by Neighborhood?
+```{r nbh facet map}
+city_map +
+  geom_point(data = df_nbh, aes(x, y, color = neighborhood), alpha = .3, size = 1) +
+  facet_wrap(~neighborhood, ncol = 5) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Police Incident Data",
+     x = NULL,
+     y = NULL) +
+  guides(alpha = FALSE,
+         fill = guide_colorbar("Count of Arrests")) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text = element_blank(),
+        strip.text = element_text(size = 6))
+```
