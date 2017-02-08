@@ -17,7 +17,7 @@ We will be using the following R packages for this analysis
 Install these packages using the following code
 
 ``` r
-#install.packages(c("tidyverse", "lubridate", "viridis", "ggmap"), repos = )
+install.packages(c("tidyverse", "lubridate", "viridis", "ggmap"))
 ```
 
 Then load the packages
@@ -223,7 +223,7 @@ df %>%
 
     ## `geom_smooth()` using method = 'gam'
 
-![](Exploratory_Analysis_files/figure-markdown_github/arrests%20over%20time-1.png)
+![](Exploratory_Analysis_rmarkdown_github_files/figure-markdown_github/arrests%20over%20time-1.png)
 
 Looks like there is a data or reporting problem in Zone 6
 
@@ -247,7 +247,7 @@ df %>%
 
     ## `geom_smooth()` using method = 'gam'
 
-![](Exploratory_Analysis_files/figure-markdown_github/arrests%20over%20time%202008-1.png)
+![](Exploratory_Analysis_rmarkdown_github_files/figure-markdown_github/arrests%20over%20time%202008-1.png)
 
 Which neighborhood has the most arrests?
 
@@ -314,7 +314,7 @@ ggplot(data = pot_arrests, aes(x = date, y = n)) +
 
     ## `geom_smooth()` using method = 'gam'
 
-![](Exploratory_Analysis_files/figure-markdown_github/marijuana%20arrests-1.png)
+![](Exploratory_Analysis_rmarkdown_github_files/figure-markdown_github/marijuana%20arrests-1.png)
 
 Let's look at how the data looks on a map
 
@@ -362,7 +362,7 @@ View the map to make sure it looks right
 ggmap(city_map)
 ```
 
-![](Exploratory_Analysis_files/figure-markdown_github/view%20map-1.png)
+![](Exploratory_Analysis_rmarkdown_github_files/figure-markdown_github/view%20map-1.png)
 
 Filter out data that is not in one of the six police zones
 
@@ -398,4 +398,4 @@ ggmap(city_map) +
 
     ## Warning: Removed 29005 rows containing non-finite values (stat_density2d).
 
-![](Exploratory_Analysis_files/figure-markdown_github/plot%20map-1.png)
+![](Exploratory_Analysis_rmarkdown_github_files/figure-markdown_github/plot%20map-1.png)

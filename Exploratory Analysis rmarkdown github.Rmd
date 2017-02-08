@@ -28,7 +28,7 @@ We will be using the following R packages for this analysis
 
 Install these packages using the following code
 ```{r install packages, eval = FALSE}
-#install.packages(c("tidyverse", "lubridate", "viridis", "ggmap"), repos = )
+install.packages(c("tidyverse", "lubridate", "viridis", "ggmap"))
 ```
 
 Then load the packages
@@ -116,9 +116,7 @@ df %>%
   group_by(zone, date) %>% 
   count() %>% 
   ggplot(aes(date, n, color = zone, fill = zone)) +
-  #geom_point(alpha = .02) +
   geom_smooth() +
-  #facet_wrap(~month, ncol = 1) +
   scale_fill_viridis(discrete = TRUE) +
   scale_color_viridis(discrete = TRUE) +
   coord_cartesian(ylim = c(0, 60))
@@ -137,9 +135,7 @@ df %>%
   group_by(zone, date) %>% 
   count() %>% 
   ggplot(aes(date, n, color = zone, fill = zone)) +
-  #geom_point(alpha = .02) +
   geom_smooth() +
-  #facet_wrap(~month, ncol = 1) +
   scale_fill_viridis(discrete = TRUE) +
   scale_color_viridis(discrete = TRUE) +
   coord_cartesian(ylim = c(0, 60))
@@ -156,7 +152,6 @@ df %>%
 Which arrest descriptions are the most common?
 ```{r arrest descriptions}
 df %>%
-  #filter(incident_zone == 2) %>% 
   group_by(description) %>% 
   count() %>% 
   arrange(-n)
@@ -205,7 +200,6 @@ ggmap(city_map) +
                       fill = ..level.., #Use the count of arrests as the fill
                       alpha = .5), #Use alpha so you can see the map under the data
                   geom = "polygon") + #We want the contour in a polygon
-  #facet_wrap(~wday, nrow = 2) +
   scale_fill_viridis() +
   guides(alpha = FALSE,
          fill = guide_colorbar("Count of Arrests")) +
