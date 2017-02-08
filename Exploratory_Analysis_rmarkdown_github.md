@@ -3,7 +3,7 @@ Exploratory Analysis
 
 The Western Pennsylvania Regional Data Center (<http://www.wprdc.org/>) is a great resource for data about Pittsburgh
 
-They have published an archive of crime incident data from 2005-2015
+They have published an archive of police incident data from 2005-2015
 
 You can download the data here: <https://data.wprdc.org/dataset/uniform-crime-reporting-data>
 
@@ -163,7 +163,7 @@ glimpse(df)
     ## $ x            <dbl> -79.93403, 0.00000, 0.00000, -80.02433, 0.00000, ...
     ## $ y            <dbl> 40.43887, 0.00000, 0.00000, 40.46254, 0.00000, 40...
 
-Which zone has the most arrests?
+Which zone has the most incidents?
 
 ``` r
 df %>%
@@ -211,7 +211,7 @@ theme_set(theme_nhh())
     ## legend.box.spacing, panel.spacing.x, panel.spacing.y, plot.subtitle,
     ## plot.caption, strip.placement
 
-How has the number of arrests changed over time?
+How has the number of incidents changed over time?
 
 ``` r
 df %>% 
@@ -226,7 +226,7 @@ df %>%
 
     ## `geom_smooth()` using method = 'gam'
 
-![](Exploratory_Analysis_rmarkdown_github_files/figure-markdown_github/arrests%20over%20time-1.png)
+![](Exploratory_Analysis_rmarkdown_github_files/figure-markdown_github/incidents%20over%20time-1.png)
 
 Looks like there is a data or reporting problem in Zone 6
 
@@ -249,9 +249,9 @@ df %>%
 
     ## `geom_smooth()` using method = 'gam'
 
-![](Exploratory_Analysis_rmarkdown_github_files/figure-markdown_github/arrests%20over%20time%202008-1.png)
+![](Exploratory_Analysis_rmarkdown_github_files/figure-markdown_github/incidents%20over%20time%202008-1.png)
 
-Which neighborhood has the most arrests?
+Which neighborhood has the most incidents?
 
 ``` r
 df %>%
@@ -275,7 +275,7 @@ df %>%
     ## 10             Central Oakland 10435
     ## # ... with 85 more rows
 
-Which arrest descriptions are the most common?
+Which incident descriptions are the most common?
 
 ``` r
 df %>%
@@ -301,22 +301,22 @@ df %>%
 
 Looks like there are many NA values
 
-Have the number of marijuana-related arrests changed over time?
+Have the number of marijuana-related incidents changed over time?
 
 ``` r
-pot_arrests <- df %>%
+pot_incidents <- df %>%
   filter(grepl("MARIJUANA", description) == TRUE) %>%
   group_by(date) %>% 
   count() 
 
 #Plot the data
-ggplot(data = pot_arrests, aes(x = date, y = n)) +
+ggplot(data = pot_incidents, aes(x = date, y = n)) +
   geom_smooth()
 ```
 
     ## `geom_smooth()` using method = 'gam'
 
-![](Exploratory_Analysis_rmarkdown_github_files/figure-markdown_github/marijuana%20arrests-1.png)
+![](Exploratory_Analysis_rmarkdown_github_files/figure-markdown_github/marijuana%20incidents-1.png)
 
 Let's look at how the data looks on a map
 
@@ -378,12 +378,12 @@ ggmap(city_map) +
   stat_density_2d(data = df_map, #Using a 2d contour
                   aes(x, #longitude
                       y, #latitude
-                      fill = ..level.., #Use the level of arrests as the fill
+                      fill = ..level.., #Use the count of incidents as the fill
                       alpha = .5), #Use alpha so you can see the map under the data
                   geom = "polygon") + #We want the contour in a polygon
   scale_fill_viridis() +
   guides(alpha = FALSE,
-         fill = guide_colorbar("Count of Arrests")) +
+         fill = guide_colorbar("Count of Incidents")) +
   labs(x = "",
        y = "") +
   theme_nhh() +
