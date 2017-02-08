@@ -133,20 +133,6 @@ Incidents reported in Zone 6 before Zone 6 was reopened in 2008 appear to be geo
 #Zone reporting consistency
 
 Does the Zone the incident is assigned to match the geolocations the incident is reported at?
-```{r zone map}
-city_map +
-  geom_point(data = df_map_zones, aes(x, y, color = zone), alpha = .3, size = 1) +
-  facet_wrap(~zone, nrow = 2) +
-  scale_color_viridis(discrete = TRUE) +
-  labs(title = "Pittsburgh Crime Incident Data",
-        x = NULL,
-       y = NULL) +
-  guides(alpha = FALSE,
-         color = FALSE) +
-  theme(legend.position = "bottom",
-        legend.direction = "horizontal",
-        axis.text = element_blank())
-```
 
 ```{r create city map 11}
 city_map_11 <-  get_map(location = "Oakland, Pittsburgh, PA",
@@ -165,21 +151,33 @@ df_map_zones <- df %>%
   mutate(zone = as.factor(paste("Zone:", zone)))
 ```
 
+```{r zone map}
+city_map_11 +
+  geom_point(data = df_map_zones, aes(x, y, color = zone), alpha = .3, size = 1) +
+  facet_wrap(~zone, nrow = 2) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+        x = NULL,
+       y = NULL) +
+  guides(alpha = FALSE,
+         color = FALSE) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text = element_blank())
+```
+
 In this veiw, the data looks accurate
 ```{r create zone map}
 city_map_11 +
-  geom_point(data = df_map_zones, aes(x, y, color = as.factor(zone)), alpha = .3, size = .7) +
+  geom_point(data = df_map_zones, aes(x, y, color = as.factor(zone)), alpha = .3, size = .7, show.legend = FALSE) +
   scale_color_viridis(discrete = TRUE) +
   labs(title = "Pittsburgh Police Incident Data",
        x = NULL,
        y = NULL) +
-  guides(fill = guide_legend(title = NULL)) +
   theme(legend.position = "bottom",
         legend.direction = "horizontal",
         axis.text = element_blank())
-#fix fill guide
 ```
-
 
 ```{r create city map 12}
 city_map_12 <-  get_map(location = "Oakland, Pittsburgh, PA",
@@ -229,7 +227,7 @@ df_nbh <- df %>%
 
 Looking at the data from the top 10 Neighborhoods in one map:
 ```{r nbh map}
-city_map +
+city_map_12 +
   geom_point(data = df_nbh, aes(x, y, color = neighborhood), alpha = .3, size = 1) +
   scale_color_viridis(discrete = TRUE) +
   labs(title = "Pittsburgh Police Incident Data",
@@ -246,17 +244,48 @@ The borders between Neighborhoods are significantly less clearly delineated than
 
 How does the data look when it is faceted by Neighborhood?
 ```{r nbh facet map}
-city_map +
+city_map_12 +
   geom_point(data = df_nbh, aes(x, y, color = neighborhood), alpha = .3, size = 1) +
   facet_wrap(~neighborhood, ncol = 5) +
   scale_color_viridis(discrete = TRUE) +
   labs(title = "Pittsburgh Police Incident Data",
      x = NULL,
      y = NULL) +
-  guides(alpha = FALSE,
-         fill = guide_colorbar("Count of Arrests")) +
-  theme(legend.position = "bottom",
-        legend.direction = "horizontal",
-        axis.text = element_blank(),
+  guides(color = FALSE) +
+  theme(axis.text = element_blank(),
         strip.text = element_text(size = 6))
 ```
+
+There appears to be significant data quality issues with the Neighborhood designations
+
+Many Neighborhoods have incidents reported in multiple zones
+
+```{r zone vs nbh df}
+df_zone_nbh <- df %>% 
+  filter(zone %in% c(1:6)) %>% 
+  group_by(zone, neighborhood) %>% 
+  count() %>% 
+  arrange(-n) %>% 
+  mutate(neighborhood = factor(neighborhood))
+```
+
+```{r zone vs nbh plot}
+ggplot(df_zone_nbh, aes(zone, reorder(neighborhood, n), fill = n)) +
+  geom_tile() +
+  facet_wrap(~zone,
+             nrow = 1,
+             scales = "free_x") +
+  coord_equal() +
+  labs(x = "Zone",
+       y = "Neighborhood",
+       title = "Pittsburgh Police Incident Data") +
+  guides(fill = guide_colorbar("Count of Incidents")) +
+  scale_fill_viridis() +
+  scale_x_discrete(expand = c(0,0)) +
+  scale_y_discrete(expand = c(0,0)) +
+  theme(axis.text = element_text(size = 8),
+        strip.text = element_text(size = 8),
+        panel.grid = element_blank())
+```
+
+  
