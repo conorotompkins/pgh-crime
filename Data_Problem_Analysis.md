@@ -52,7 +52,7 @@ city_map_11 +
         axis.text = element_blank())
 ```
 
-    ## Warning: Removed 22717 rows containing missing values (geom_point).
+    ## Warning: Removed 22716 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/create%20zone%20map-1.png)
 
@@ -91,7 +91,7 @@ city_map_12 +
         axis.text = element_blank())
 ```
 
-    ## Warning: Removed 25521 rows containing missing values (geom_point).
+    ## Warning: Removed 29005 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/faceted%20zone%20map-1.png)
 
@@ -129,12 +129,10 @@ city_map_12 +
        y = NULL) +
   guides(alpha = FALSE,
          color = FALSE) +
-  theme(legend.position = "bottom",
-        legend.direction = "horizontal",
-        axis.text = element_blank())
+  theme(axis.text = element_blank())
 ```
 
-    ## Warning: Removed 4846 rows containing missing values (geom_point).
+    ## Warning: Removed 5032 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/nbh%20map-1.png)
 
@@ -155,7 +153,7 @@ city_map_12 +
         strip.text = element_text(size = 6))
 ```
 
-    ## Warning: Removed 4846 rows containing missing values (geom_point).
+    ## Warning: Removed 5032 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/nbh%20facet%20map-1.png)
 
@@ -312,7 +310,7 @@ ggplot(df_zones_nbh, aes(count, percent_correct, label = neighborhood, fill = co
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/correct%20zone%20percentage%20plot-1.png)
 
-Zone 6 appears to have the lowest % of correct Zone assignments. Southside Flats and Golden Triangle/Civic Arena have most of the incorrect assignments
+Zone 6 appears to have the lowest % of correct Zone assignments. Golden Triangle/Civic Arena and Bloomfield appear to have most of the incorrect assignments
 
 Our original question was: What are the drivers of the incorrect assignments?
 
@@ -461,29 +459,16 @@ df_map_z6 <- df %>%
 
 ``` r
 ggmap(z6_map) +
-  stat_density_2d(data = df_map_z6, #Using a 2d contour
-                  aes(x, #longitude
-                      y, #latitude
-                      fill = ..level.., #Use the count of incidents as the fill
-                      alpha = .5), #Use alpha so you can see the map under the data
-                  geom = "polygon") + #We want the contour in a polygon
-  scale_fill_viridis() +
-  guides(alpha = FALSE,
-         fill = guide_colorbar("Count of Incidents")) +
-  labs(x = "",
-       y = "",
-       title = "Zone 6 Incidents before 2008") +
-  theme_nhh() +
+geom_point(data = df_map_z6, aes(x, y, color = zone), alpha = .3, size = 1) +
+  scale_color_viridis(discrete = TRUE) +
+  guides(color = FALSE) +
+  labs(x = NULL,
+       y = NULL,
+       title = "Zone 6 Incidents 2005-2008") +
   theme(axis.text = element_blank())
 ```
 
-    ## Warning: `panel.margin` is deprecated. Please use `panel.spacing` property
-    ## instead
-
-    ## Warning: `legend.margin` must be specified using `margin()`. For the old
-    ## behavior use legend.spacing
-
-    ## Warning: Removed 170 rows containing non-finite values (stat_density2d).
+    ## Warning: Removed 170 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/plot%20map-1.png)
 
@@ -491,4 +476,4 @@ This broadly lines up with the borders of Zone 6
 
 Incidents reported in Zone 6 before Zone 6 was reopened in 2008 appear to be geolocated appropriately
 
-I think there should be a special flag for these incidents. LOgging incidents in a Zone that did not exist at the time does not really make sense.
+I think there should be a special flag for these incidents. Assigning incidents to a Zone that did not exist at the time seems confusing
