@@ -1,3 +1,7 @@
+This is an analysis of potential data problems in the Pittsburgh Police Incident Blotter Archive.
+
+These are the R packages used in this analysis:
+
 ``` r
 library(rmarkdown)
 library(knitr)
@@ -8,7 +12,9 @@ library(ggmap)
 library(scales)
 ```
 
-This is an analysis of potential data problems in the Pittsburgh Police Incident Blotter Archive.
+Refer to the Exploratory Analysis file on my GitHub page for an intro on working with this data
+
+<https://github.com/conorotompkins/pgh-crime/blob/master/Exploratory_Analysis_rmarkdown_github.md>
 
 Zone reporting consistency
 ==========================
@@ -32,7 +38,7 @@ df_map_zones <- df %>%
   mutate(zone = as.factor(paste("Zone:", zone)))
 ```
 
-In this veiw, the data looks accurate
+In this vieww, the data looks accurate
 
 ``` r
 city_map_11 +
@@ -53,10 +59,10 @@ city_map_11 +
 One note of concern is that 5% of the data is outside the x,y coordinates in this map
 
 ``` r
-paste0(round(22716 / nrow(df_map_zones), 2), "%")
+paste0(round(22716 / nrow(df_map_zones), 2) * 100, "%")
 ```
 
-    ## [1] "0.05%"
+    ## [1] "5%"
 
 ``` r
 city_map_12 <-  get_map(location = "Oakland, Pittsburgh, PA",
@@ -64,37 +70,7 @@ city_map_12 <-  get_map(location = "Oakland, Pittsburgh, PA",
                maptype = "toner", 
                source = "stamen",
                messaging = FALSE)
-```
 
-    ## Map from URL : http://maps.googleapis.com/maps/api/staticmap?center=Oakland,+Pittsburgh,+PA&zoom=12&size=640x640&scale=2&maptype=terrain&sensor=false
-
-    ## Information from URL : http://maps.googleapis.com/maps/api/geocode/json?address=Oakland,%20Pittsburgh,%20PA&sensor=false
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1137/1542.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1138/1542.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1139/1542.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1137/1543.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1138/1543.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1139/1543.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1137/1544.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1138/1544.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1139/1544.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1137/1545.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1138/1545.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1139/1545.png
-
-``` r
 city_map_12 <- ggmap(city_map_12)
 ```
 
@@ -123,6 +99,8 @@ Neighborhood reporting consistency
 ==================================
 
 Does the data for the Neighborhoods look the same?
+
+Let's just look at the top 10 Neighorhoods in terms of \# of incidents
 
 ``` r
 neighborhoods_top10 <- df %>% 
@@ -196,7 +174,7 @@ df_zone_nbh <- df %>%
 
 ``` r
 ggplot(df_zone_nbh, aes(zone, reorder(neighborhood, n), fill = n)) +
-  geom_tile() +
+  geom_tile(color = "grey") +
   facet_wrap(~zone,
              nrow = 1,
              scales = "free_x") +
@@ -217,7 +195,7 @@ ggplot(df_zone_nbh, aes(zone, reorder(neighborhood, n), fill = n)) +
 
 What are the drivers of the incorrect assignments?
 
-First, we need to identify the correct Zones for Neighborhoods
+First, we need to identify the correct Zone for each Neighborhood
 
 My method is to find the Zone with the highest \# of incidents for a Neighborhood
 
@@ -235,6 +213,8 @@ df_correct_zone <- df %>%
   mutate(correct_zone = zone) %>% 
   select(correct_zone, neighborhood)
 ```
+
+Testing this method for Zone 1:
 
 ``` r
 df_correct_zone %>% 
@@ -263,6 +243,8 @@ df_correct_zone %>%
     ## 17            1            Summer Hill
     ## 18            1 Troy Hill-Herrs Island
 
+Testing this method for Zone 2:
+
 ``` r
 df_correct_zone %>% 
   filter(correct_zone == "2")
@@ -283,6 +265,8 @@ df_correct_zone %>%
     ## 10            2             Terrace Village
     ## 11            2                  Upper Hill
     ## 12            2         Upper Lawrenceville
+
+This approximation appears correct
 
 Then, calculate how many of a neighborhood's incidents were reported in the correct zone
 
@@ -319,7 +303,7 @@ ggplot(df_zones_nbh, aes(count, percent_correct, label = neighborhood, fill = co
   geom_label(size = 2) +
   scale_y_continuous(labels = percent) +
   scale_x_continuous(labels = comma) +
-  labs(x = "Count of Arrest Incidents",
+  labs(x = "Count of Incidents",
        y = "Percent Reported in Correct Zone",
        title = "Nieghborhood-Zone Reporting Analysis") +
   guides(fill = guide_legend(title = "Correct Zone")) +
@@ -329,6 +313,8 @@ ggplot(df_zones_nbh, aes(count, percent_correct, label = neighborhood, fill = co
 ![](Data_Problem_Analysis_files/figure-markdown_github/correct%20zone%20percentage%20plot-1.png)
 
 Zone 6 appears to have the lowest % of correct Zone assignments. Southside Flats and Golden Triangle/Civic Arena have most of the incorrect assignments
+
+Our original question was: What are the drivers of the incorrect assignments?
 
 ``` r
 df_bad_zones_helper1 <- df %>% 

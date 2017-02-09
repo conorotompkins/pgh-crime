@@ -9,8 +9,11 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-tidy = TRUE
 ```
+
+This is an analysis of potential data problems in the Pittsburgh Police Incident Blotter Archive.
+
+These are the R packages used in this analysis:
 
 ```{r load libraries, message=FALSE, warning=FALSE}
 library(rmarkdown)
@@ -27,7 +30,9 @@ source("https://raw.githubusercontent.com/conorotompkins/AdjGSAA/master/graphs/t
 theme_set(theme_nhh())
 ```
 
-This is an analysis of potential data problems in the Pittsburgh Police Incident Blotter Archive.
+Refer to the Exploratory Analysis file on my GitHub page for an intro on working with this data
+
+https://github.com/conorotompkins/pgh-crime/blob/master/Exploratory_Analysis_rmarkdown_github.md
 
 ```{r read data into r, echo=FALSE, message=FALSE, warning=FALSE}
 df <- read_csv("archive-police-blotter.csv")
@@ -95,7 +100,7 @@ df_map_zones <- df %>%
   mutate(zone = as.factor(paste("Zone:", zone)))
 ```
 
-In this veiw, the data looks accurate
+In this vieww, the data looks accurate
 ```{r create zone map}
 city_map_11 +
   geom_point(data = df_map_zones, aes(x, y, color = as.factor(zone)), alpha = .3, size = .7, show.legend = FALSE) +
@@ -110,10 +115,10 @@ city_map_11 +
 
 One note of concern is that 5% of the data is outside the x,y coordinates in this map
 ```{r outside of map}
-paste0(round(22716 / nrow(df_map_zones), 2), "%")
+paste0(round(22716 / nrow(df_map_zones), 2) * 100, "%")
 ```
 
-```{r create city map 12}
+```{r create city map 12, message=FALSE, warning=FALSE}
 city_map_12 <-  get_map(location = "Oakland, Pittsburgh, PA",
                zoom = 12,
                maptype = "toner", 
@@ -142,6 +147,8 @@ city_map_12 +
 #Neighborhood reporting consistency
 
 Does the data for the Neighborhoods look the same?
+
+Let's just look at the top 10 Neighorhoods in terms of # of incidents
 ```{r get top 10 neighborhoods}
 neighborhoods_top10 <- df %>% 
   filter(!is.na(neighborhood)) %>% 
@@ -202,9 +209,9 @@ df_zone_nbh <- df %>%
   mutate(neighborhood = factor(neighborhood))
 ```
 
-```{r zone vs nbh plot, fig.height=9, fig.width=6}
+```{r zone vs nbh plot, fig.height=11, fig.width=6}
 ggplot(df_zone_nbh, aes(zone, reorder(neighborhood, n), fill = n)) +
-  geom_tile() +
+  geom_tile(color = "grey") +
   facet_wrap(~zone,
              nrow = 1,
              scales = "free_x") +
@@ -223,7 +230,7 @@ ggplot(df_zone_nbh, aes(zone, reorder(neighborhood, n), fill = n)) +
 
 What are the drivers of the incorrect assignments?
 
-First, we need to identify the correct Zones for Neighborhoods 
+First, we need to identify the correct Zone for each Neighborhood 
 
 My method is to find the Zone with the highest # of incidents for a Neighborhood
 ```{r correct zone df}
@@ -241,17 +248,19 @@ df_correct_zone <- df %>%
   select(correct_zone, neighborhood)
 ```
 
-
-
+Testing this method for Zone 1:
 ```{r head correct zone df 1}
 df_correct_zone %>% 
   filter(correct_zone == "1")
 ```
 
+Testing this method for Zone 2:
 ```{r head correct zone df 2}
 df_correct_zone %>% 
   filter(correct_zone == "2")
 ```
+
+This approximation appears correct
 
 Then, calculate how many of a neighborhood's incidents were reported in the correct zone
 ```{r calculate correct zone percentage}
@@ -284,7 +293,7 @@ ggplot(df_zones_nbh, aes(count, percent_correct, label = neighborhood, fill = co
   geom_label(size = 2) +
   scale_y_continuous(labels = percent) +
   scale_x_continuous(labels = comma) +
-  labs(x = "Count of Arrest Incidents",
+  labs(x = "Count of Incidents",
        y = "Percent Reported in Correct Zone",
        title = "Nieghborhood-Zone Reporting Analysis") +
   guides(fill = guide_legend(title = "Correct Zone")) +
@@ -292,6 +301,8 @@ ggplot(df_zones_nbh, aes(count, percent_correct, label = neighborhood, fill = co
 ```
 
 Zone 6 appears to have the lowest % of correct Zone assignments. Southside Flats and Golden Triangle/Civic Arena have most of the incorrect assignments
+
+Our original question was: What are the drivers of the incorrect assignments?
 
 ```{r helper nbh}
 df_bad_zones_helper1 <- df %>% 
@@ -353,7 +364,7 @@ df_bad_zones <- df %>%
          neighborhood = factor(neighborhood, levels = df_bad_zones_helper1$neighborhood))
 ```
 
-```{r bad zones plot}
+```{r bad zones plot, fig.height=11, fig.width=6}
 ggplot(df_bad_zones, aes(zone, neighborhood, fill = n)) +
   geom_tile() +
   coord_equal() +
