@@ -52,7 +52,7 @@ city_map_11 +
         axis.text = element_blank())
 ```
 
-    ## Warning: Removed 22716 rows containing missing values (geom_point).
+    ## Warning: Removed 22717 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/create%20zone%20map-1.png)
 
@@ -64,6 +64,8 @@ paste0(round(22716 / nrow(df_map_zones), 2) * 100, "%")
 
     ## [1] "5%"
 
+Faceting the data by Zone to separate it, the data looks less accurate
+
 ``` r
 city_map_12 <-  get_map(location = "Oakland, Pittsburgh, PA",
                zoom = 12,
@@ -73,8 +75,6 @@ city_map_12 <-  get_map(location = "Oakland, Pittsburgh, PA",
 
 city_map_12 <- ggmap(city_map_12)
 ```
-
-Faceting the data by Zone to separate it, the data looks less accurate
 
 ``` r
 city_map_12 +
@@ -91,7 +91,7 @@ city_map_12 +
         axis.text = element_blank())
 ```
 
-    ## Warning: Removed 29005 rows containing missing values (geom_point).
+    ## Warning: Removed 25521 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/faceted%20zone%20map-1.png)
 
@@ -134,7 +134,7 @@ city_map_12 +
         axis.text = element_blank())
 ```
 
-    ## Warning: Removed 5032 rows containing missing values (geom_point).
+    ## Warning: Removed 4846 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/nbh%20map-1.png)
 
@@ -155,7 +155,7 @@ city_map_12 +
         strip.text = element_text(size = 6))
 ```
 
-    ## Warning: Removed 5032 rows containing missing values (geom_point).
+    ## Warning: Removed 4846 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/nbh%20facet%20map-1.png)
 
@@ -490,3 +490,5 @@ ggmap(z6_map) +
 This broadly lines up with the borders of Zone 6
 
 Incidents reported in Zone 6 before Zone 6 was reopened in 2008 appear to be geolocated appropriately
+
+I think there should be a special flag for these incidents. LOgging incidents in a Zone that did not exist at the time does not really make sense.
