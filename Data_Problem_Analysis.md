@@ -1,62 +1,4 @@
-    ## Loading tidyverse: ggplot2
-    ## Loading tidyverse: tibble
-    ## Loading tidyverse: tidyr
-    ## Loading tidyverse: readr
-    ## Loading tidyverse: purrr
-    ## Loading tidyverse: dplyr
-
-    ## Conflicts with tidy packages ----------------------------------------------
-
-    ## filter(): dplyr, stats
-    ## lag():    dplyr, stats
-
-    ## 
-    ## Attaching package: 'lubridate'
-
-    ## The following object is masked from 'package:base':
-    ## 
-    ##     date
-
-    ## Warning: `panel.margin` is deprecated. Please use `panel.spacing` property
-    ## instead
-
-    ## Warning: `legend.margin` must be specified using `margin()`. For the old
-    ## behavior use legend.spacing
-
-    ## Warning: New theme missing the following elements: axis.title.x.top,
-    ## axis.title.y.right, axis.text.x.top, axis.text.y.right, legend.spacing.x,
-    ## legend.spacing.y, legend.box.margin, legend.box.background,
-    ## legend.box.spacing, panel.spacing.x, panel.spacing.y, plot.subtitle,
-    ## plot.caption, strip.placement
-
 This is an analysis of potential data problems in the Pittsburgh Police Incident Blotter Archive.
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   PK = col_integer(),
-    ##   CCR = col_integer(),
-    ##   HIERARCHY = col_integer(),
-    ##   INCIDENTTIME = col_character(),
-    ##   INCIDENTLOCATION = col_character(),
-    ##   CLEAREDFLAG = col_character(),
-    ##   INCIDENTNEIGHBORHOOD = col_character(),
-    ##   INCIDENTZONE = col_character(),
-    ##   HIERARCHYDESC = col_character(),
-    ##   OFFENSES = col_character(),
-    ##   INCIDENTTRACT = col_integer(),
-    ##   X = col_double(),
-    ##   Y = col_double()
-    ## )
-
-    ## Warning: 6 parsing failures.
-    ##    row col               expected  actual
-    ##  26010 CCR no trailing characters .19743 
-    ##  47848 CCR no trailing characters -78692 
-    ##  96952 CCR no trailing characters -46945 
-    ## 233211 CCR no trailing characters  89837 
-    ## 307276 CCR no trailing characters  024874
-    ## ...... ... ...................... .......
-    ## See problems(...) for more details.
 
 Zone 6
 ======
@@ -107,28 +49,6 @@ z6_map <-  get_map(location = "Mount Washington, Pittsburgh, PA",
                messaging = FALSE)
 ```
 
-    ## Map from URL : http://maps.googleapis.com/maps/api/staticmap?center=Mount+Washington,+Pittsburgh,+PA&zoom=12&size=640x640&scale=2&maptype=terrain&sensor=false
-
-    ## Information from URL : http://maps.googleapis.com/maps/api/geocode/json?address=Mount%20Washington,%20Pittsburgh,%20PA&sensor=false
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1136/1543.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1137/1543.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1138/1543.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1136/1544.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1137/1544.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1138/1544.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1136/1545.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1137/1545.png
-
-    ## Map from URL : http://tile.stamen.com/toner/12/1138/1545.png
-
 ``` r
 df_map_z6 <- df %>% 
   filter(zone == 6, year <= 2008)
@@ -177,45 +97,7 @@ city_map_11 <-  get_map(location = "Oakland, Pittsburgh, PA",
                maptype = "toner", 
                source = "stamen",
                messaging = FALSE)
-```
 
-    ## Map from URL : http://maps.googleapis.com/maps/api/staticmap?center=Oakland,+Pittsburgh,+PA&zoom=11&size=640x640&scale=2&maptype=terrain&sensor=false
-
-    ## Information from URL : http://maps.googleapis.com/maps/api/geocode/json?address=Oakland,%20Pittsburgh,%20PA&sensor=false
-
-    ## Map from URL : http://tile.stamen.com/toner/11/567/770.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/568/770.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/569/770.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/570/770.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/567/771.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/568/771.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/569/771.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/570/771.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/567/772.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/568/772.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/569/772.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/570/772.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/567/773.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/568/773.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/569/773.png
-
-    ## Map from URL : http://tile.stamen.com/toner/11/570/773.png
-
-``` r
 city_map_11 <- ggmap(city_map_11)
 ```
 

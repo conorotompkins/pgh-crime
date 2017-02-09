@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 tidy = TRUE
 ```
 
-```{r load libraries, echo = FALSE}
+```{r load libraries, echo=FALSE, message=FALSE, warning=FALSE}
 library(rmarkdown)
 library(knitr)
 library(tidyverse)
@@ -21,22 +21,22 @@ library(viridis)
 library(ggmap)
 ```
 
-```{r load custom theme, echo = FALSE}
+```{r load custom theme, echo=FALSE, message=FALSE, warning=FALSE}
 source("https://raw.githubusercontent.com/conorotompkins/AdjGSAA/master/graphs/theme_nhh.R")
 theme_set(theme_nhh())
 ```
 
 This is an analysis of potential data problems in the Pittsburgh Police Incident Blotter Archive.
 
-```{r read data into r, echo = FALSE}
+```{r read data into r, echo=FALSE, message=FALSE, warning=FALSE}
 df <- read_csv("archive-police-blotter.csv")
 ```
 
-```{r lower case column names, echo = FALSE}
+```{r lower case column names, echo=FALSE, message=FALSE, warning=FALSE}
 colnames(df) <- tolower(colnames(df))
 ```
 
-```{r rename columnn names, echo = FALSE}
+```{r rename columnn names, echo=FALSE, message=FALSE, warning=FALSE}
 df <- df %>% 
   rename(date_time = incidenttime,
          location = incidentlocation,
@@ -47,7 +47,7 @@ df <- df %>%
          tract = incidenttract)
 ```
 
-```{r lubridate column names, echo = FALSE}
+```{r lubridate column names, echo=FALSE, message=FALSE, warning=FALSE}
 df <- df %>%
   mutate(date_time = mdy_hm(date_time),
          date = ymd(substr(date_time, 1, 10)),
@@ -57,7 +57,7 @@ df <- df %>%
          mday = mday(date))
 ```         
 
-```{r reorder column names, echo = FALSE}
+```{r reorder column names, echo=FALSE, message=FALSE, warning=FALSE}
 df <- df %>% 
   select(date, 
          year,
@@ -98,7 +98,7 @@ df %>%
 
 Where did this incidents occur?
 
-```{r create z6 map}
+```{r create z6 map, message=FALSE, warning=FALSE}
 z6_map <-  get_map(location = "Mount Washington, Pittsburgh, PA",
                zoom = 12,
                maptype = "toner", 
@@ -137,7 +137,7 @@ Incidents reported in Zone 6 before Zone 6 was reopened in 2008 appear to be geo
 
 Does the Zone the incident is assigned to match the geolocations the incident is reported at?
 
-```{r create city map 11}
+```{r create city map 11, message=FALSE, warning=FALSE}
 city_map_11 <-  get_map(location = "Oakland, Pittsburgh, PA",
                zoom = 11,
                maptype = "toner", 
