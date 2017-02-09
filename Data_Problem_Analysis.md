@@ -38,7 +38,7 @@ df_map_zones <- df %>%
   mutate(zone = as.factor(paste("Zone:", zone)))
 ```
 
-In this vieww, the data looks accurate
+In this view, the data looks accurate
 
 ``` r
 city_map_11 +
@@ -410,7 +410,7 @@ Zone 6 was closed in 2003, and reopened in 2008.
 
 <http://www.post-gazette.com/local/neighborhoods/2008/03/31/Police-manpower-tipped-to-West-End-s-Zone-6/stories/200803310145>
 
-Therefore, we should expect that there are 0 incidents between 2005 (when the data begins) and 2008
+Therefore, we should expect that there are 0 incidents between 2005 (when the data begins) and 2008 in Zone 6
 
 ``` r
 df %>%
@@ -424,6 +424,8 @@ df %>%
     ##    zone     n
     ##   <chr> <int>
     ## 1     6  2889
+
+This shows that there are 2,889 incidents in this period for Zone 6
 
 ``` r
 df %>%
@@ -442,7 +444,7 @@ df %>%
     ## 5     6 2005-04-26 INVOLUNTARY DEV SEXUAL INTER
     ## 6     6 2005-03-24                         <NA>
 
-Where did this incidents occur?
+Where did these incidents occur?
 
 ``` r
 z6_map <-  get_map(location = "Mount Washington, Pittsburgh, PA",
