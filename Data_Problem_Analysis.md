@@ -1,3 +1,13 @@
+``` r
+library(rmarkdown)
+library(knitr)
+library(tidyverse)
+library(lubridate)
+library(viridis)
+library(ggmap)
+library(scales)
+```
+
 This is an analysis of potential data problems in the Pittsburgh Police Incident Blotter Archive.
 
 Zone reporting consistency
@@ -40,6 +50,14 @@ city_map_11 +
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/create%20zone%20map-1.png)
 
+One note of concern is that 5% of the data is outside the x,y coordinates in this map
+
+``` r
+paste0(round(22716 / nrow(df_map_zones), 2), "%")
+```
+
+    ## [1] "0.05%"
+
 ``` r
 city_map_12 <-  get_map(location = "Oakland, Pittsburgh, PA",
                zoom = 12,
@@ -80,15 +98,7 @@ city_map_12 <-  get_map(location = "Oakland, Pittsburgh, PA",
 city_map_12 <- ggmap(city_map_12)
 ```
 
-One note of concern is that 5% of the data is outside the x,y coordinates in this map
-
-``` r
-paste0(round(22716 / nrow(df_map_zones), 2), "%")
-```
-
-    ## [1] "0.05%"
-
-However, when you facet the data by Zone to separate it, the data looks less accurate
+Faceting the data by Zone to separate it, the data looks less accurate
 
 ``` r
 city_map_12 +
@@ -173,7 +183,7 @@ city_map_12 +
 
 There appears to be significant data quality issues with the Neighborhood designations
 
-Many Neighborhoods have incidents reported in multiple zones
+Many Neighborhoods have incidents reported in multiple Zones
 
 ``` r
 df_zone_nbh <- df %>% 
@@ -198,17 +208,16 @@ ggplot(df_zone_nbh, aes(zone, reorder(neighborhood, n), fill = n)) +
   scale_fill_viridis() +
   scale_x_discrete(expand = c(0,0)) +
   scale_y_discrete(expand = c(0,0)) +
-  theme(axis.text = element_text(size = 8),
-        strip.text = element_text(size = 8),
-        panel.grid = element_blank(),
-        aspect.ratio= 12/1)
+  theme(axis.text = element_text(size = 9),
+        strip.text = element_text(size = 9),
+        panel.grid = element_blank())
 ```
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/zone%20vs%20nbh%20plot-1.png)
 
-what are the drivers of the incorrect assignments?
+What are the drivers of the incorrect assignments?
 
-First, we need to identify the correct zones for neighborhoods
+First, we need to identify the correct Zones for Neighborhoods
 
 My method is to find the Zone with the highest \# of incidents for a Neighborhood
 
@@ -226,6 +235,54 @@ df_correct_zone <- df %>%
   mutate(correct_zone = zone) %>% 
   select(correct_zone, neighborhood)
 ```
+
+``` r
+df_correct_zone %>% 
+  filter(correct_zone == "1")
+```
+
+    ## # A tibble: 18 × 2
+    ##    correct_zone           neighborhood
+    ##           <chr>                  <chr>
+    ## 1             1       Allegheny Center
+    ## 2             1         Allegheny West
+    ## 3             1       Brighton Heights
+    ## 4             1   California-Kirkbride
+    ## 5             1      Central Northside
+    ## 6             1                Chateau
+    ## 7             1         East Allegheny
+    ## 8             1               Fineview
+    ## 9             1             Manchester
+    ## 10            1     Marshall-Shadeland
+    ## 11            1            North Shore
+    ## 12            1      Northview Heights
+    ## 13            1            Perry North
+    ## 14            1            Perry South
+    ## 15            1          Spring Garden
+    ## 16            1  Spring Hill-City View
+    ## 17            1            Summer Hill
+    ## 18            1 Troy Hill-Herrs Island
+
+``` r
+df_correct_zone %>% 
+  filter(correct_zone == "2")
+```
+
+    ## # A tibble: 12 × 2
+    ##    correct_zone                neighborhood
+    ##           <chr>                       <chr>
+    ## 1             2           Bedford Dwellings
+    ## 2             2                       Bluff
+    ## 3             2       Central Lawrenceville
+    ## 4             2            Crawford-Roberts
+    ## 5             2 Golden Triangle/Civic Arena
+    ## 6             2         Lower Lawrenceville
+    ## 7             2                 Middle Hill
+    ## 8             2                 Polish Hill
+    ## 9             2              Strip District
+    ## 10            2             Terrace Village
+    ## 11            2                  Upper Hill
+    ## 12            2         Upper Lawrenceville
 
 Then, calculate how many of a neighborhood's incidents were reported in the correct zone
 

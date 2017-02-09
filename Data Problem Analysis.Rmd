@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 tidy = TRUE
 ```
 
-```{r load libraries, echo=FALSE, message=FALSE, warning=FALSE}
+```{r load libraries, message=FALSE, warning=FALSE}
 library(rmarkdown)
 library(knitr)
 library(tidyverse)
@@ -108,6 +108,11 @@ city_map_11 +
         axis.text = element_blank())
 ```
 
+One note of concern is that 5% of the data is outside the x,y coordinates in this map
+```{r outside of map}
+paste0(round(22716 / nrow(df_map_zones), 2), "%")
+```
+
 ```{r create city map 12}
 city_map_12 <-  get_map(location = "Oakland, Pittsburgh, PA",
                zoom = 12,
@@ -118,12 +123,7 @@ city_map_12 <-  get_map(location = "Oakland, Pittsburgh, PA",
 city_map_12 <- ggmap(city_map_12)
 ```
 
-One note of concern is that 5% of the data is outside the x,y coordinates in this map
-```{r outside of map}
-paste0(round(22716 / nrow(df_map_zones), 2), "%")
-```
-
-However, when you facet the data by Zone to separate it, the data looks less accurate
+Faceting the data by Zone to separate it, the data looks less accurate
 ```{r faceted zone map}
 city_map_12 +
   geom_point(data = df_map_zones, aes(x, y, color = zone), alpha = .3, size = 1) +
@@ -191,7 +191,7 @@ city_map_12 +
 
 There appears to be significant data quality issues with the Neighborhood designations
 
-Many Neighborhoods have incidents reported in multiple zones
+Many Neighborhoods have incidents reported in multiple Zones
 
 ```{r zone vs nbh df}
 df_zone_nbh <- df %>% 
@@ -202,7 +202,7 @@ df_zone_nbh <- df %>%
   mutate(neighborhood = factor(neighborhood))
 ```
 
-```{r zone vs nbh plot}
+```{r zone vs nbh plot, fig.height=9, fig.width=6}
 ggplot(df_zone_nbh, aes(zone, reorder(neighborhood, n), fill = n)) +
   geom_tile() +
   facet_wrap(~zone,
@@ -216,15 +216,14 @@ ggplot(df_zone_nbh, aes(zone, reorder(neighborhood, n), fill = n)) +
   scale_fill_viridis() +
   scale_x_discrete(expand = c(0,0)) +
   scale_y_discrete(expand = c(0,0)) +
-  theme(axis.text = element_text(size = 8),
-        strip.text = element_text(size = 8),
-        panel.grid = element_blank(),
-        aspect.ratio= 12/1)
+  theme(axis.text = element_text(size = 9),
+        strip.text = element_text(size = 9),
+        panel.grid = element_blank())
 ```
 
-what are the drivers of the incorrect assignments?
+What are the drivers of the incorrect assignments?
 
-First, we need to identify the correct zones for neighborhoods 
+First, we need to identify the correct Zones for Neighborhoods 
 
 My method is to find the Zone with the highest # of incidents for a Neighborhood
 ```{r correct zone df}
@@ -240,6 +239,18 @@ df_correct_zone <- df %>%
   arrange(zone) %>% 
   mutate(correct_zone = zone) %>% 
   select(correct_zone, neighborhood)
+```
+
+
+
+```{r head correct zone df 1}
+df_correct_zone %>% 
+  filter(correct_zone == "1")
+```
+
+```{r head correct zone df 2}
+df_correct_zone %>% 
+  filter(correct_zone == "2")
 ```
 
 Then, calculate how many of a neighborhood's incidents were reported in the correct zone
