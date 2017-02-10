@@ -181,6 +181,8 @@ faceted_zone_map
 ggsave("faceted_zone_map.png", faceted_zone_map, width = 16, height = 9)
 
 
+
+
 zone_map <- city_map +
   geom_point(data = df_map_zones, aes(x, y, color = as.factor(zone)), alpha = .3, size = .7) +
   scale_color_viridis(discrete = TRUE) +
@@ -192,6 +194,35 @@ zone_map <- city_map +
   theme(legend.position = "bottom",
         legend.direction = "horizontal",
         axis.text = element_blank())
+zone_map
+
+#zoom in for facets
+city_map_facets <-  ggmap(get_map("North Oakland, Pittsburgh, PA", 
+                     zoom = 12,
+                     maptype = "toner-lite", 
+                     source = "stamen"))
+
+df_map_zones_year <- df %>% 
+  select(year, zone, x, y) %>% 
+  filter(zone %in% c(1:6)) %>% 
+  mutate(zone = as.factor(paste("Zone", zone)))
+
+#facet by zone and year
+faceted_zone_map_year <- city_map_facets +
+  geom_point(data = df_map_zones_year, aes(x, y, color = zone), alpha = .3, size = 1) +
+  facet_grid(zone~year) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+       x = NULL,
+       y = NULL) +
+  guides(alpha = FALSE,
+         color = FALSE) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text = element_blank(),
+        strip.text = element_text(size = 9))
+faceted_zone_map_year
+ggsave("faceted_zone_map.png", faceted_zone_map_year, width = 16, height = 9)
   
 
 neighborhoods_top10 <- df %>% 
