@@ -52,7 +52,7 @@ city_map_11 +
         axis.text = element_blank())
 ```
 
-    ## Warning: Removed 22716 rows containing missing values (geom_point).
+    ## Warning: Removed 22717 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/create%20zone%20map-1.png)
 
@@ -91,9 +91,46 @@ city_map_12 +
         axis.text = element_blank())
 ```
 
-    ## Warning: Removed 29005 rows containing missing values (geom_point).
+    ## Warning: Removed 25521 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/faceted%20zone%20map-1.png)
+
+The reporting problems appear most prominently in 2005 and 2006
+
+``` r
+city_map_facets <-  ggmap(get_map("North Oakland, Pittsburgh, PA", 
+                     zoom = 12,
+                     maptype = "toner-lite", 
+                     source = "stamen"))
+```
+
+``` r
+df_map_zones_year <- df %>% 
+  select(year, zone, x, y) %>% 
+  filter(zone %in% c(1:6)) %>% 
+  mutate(zone = as.factor(paste("Zone", zone)))
+```
+
+``` r
+city_map_facets +
+  geom_point(data = df_map_zones_year, aes(x, y), alpha = .3, size = 1) +
+  facet_grid(zone~year) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+       x = NULL,
+       y = NULL) +
+  guides(alpha = FALSE,
+         color = FALSE) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text = element_blank(),
+        strip.text = element_text(size = 9),
+        strip.text.y = element_text(angle=0))
+```
+
+    ## Warning: Removed 27544 rows containing missing values (geom_point).
+
+![](Data_Problem_Analysis_files/figure-markdown_github/create%20zone%20year%20map%20plot-1.png)
 
 Neighborhood reporting consistency
 ==================================
@@ -132,7 +169,7 @@ city_map_12 +
   theme(axis.text = element_blank())
 ```
 
-    ## Warning: Removed 5032 rows containing missing values (geom_point).
+    ## Warning: Removed 4846 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/nbh%20map-1.png)
 
@@ -153,7 +190,7 @@ city_map_12 +
         strip.text = element_text(size = 6))
 ```
 
-    ## Warning: Removed 5032 rows containing missing values (geom_point).
+    ## Warning: Removed 4846 rows containing missing values (geom_point).
 
 ![](Data_Problem_Analysis_files/figure-markdown_github/nbh%20facet%20map-1.png)
 
@@ -264,9 +301,9 @@ df_correct_zone %>%
     ## 11            2                  Upper Hill
     ## 12            2         Upper Lawrenceville
 
-This approximation appears correct
+This approximation appears to be correct
 
-Then, calculate how many of a neighborhood's incidents were reported in the correct zone
+Then, calculate how many of a Neighborhood's incidents were reported in the correct zone
 
 ``` r
 df_zones_nbh <- df %>% 
@@ -400,6 +437,59 @@ ggplot(df_bad_zones, aes(zone, neighborhood, fill = n)) +
 Brookline has the most incidents reported in the incorrect zone
 
 Zone 3 is a major driver of incorrect Zone assignments
+
+Again, the reporting problems appear most prominently in 2005 and 2006
+
+``` r
+city_map_facets <-  ggmap(get_map("North Oakland, Pittsburgh, PA", 
+                                  zoom = 12,
+                                  maptype = "toner-lite", 
+                                  source = "stamen"))
+```
+
+``` r
+df_nbh_year <- df %>% 
+  filter(neighborhood %in% c("Golden Triangle/Civic Arena", 
+                             "Bloomfield", 
+                             "North Oakland", 
+                             "South Side Flats",
+                             "Brookline", 
+                             "Homewood South", 
+                             "Central Oakland", 
+                             "Lincoln-Lemington Lamar", 
+                             "Carrick", 
+                             "Shadyside")) %>% 
+  select(year, neighborhood, x, y) %>% 
+  mutate(neighborhood = factor(neighborhood, levels =  c("Golden Triangle/Civic Arena", 
+                             "Bloomfield", 
+                             "North Oakland", 
+                             "South Side Flats",
+                             "Brookline", 
+                             "Homewood South", 
+                             "Central Oakland", 
+                             "Lincoln-Lemington Lamar", 
+                             "Carrick", 
+                             "Shadyside")))
+```
+
+``` r
+city_map_facets +
+  geom_point(data = df_nbh_year, aes(x, y), alpha = .3, size = 1) +
+  facet_grid(neighborhood~year) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+       x = NULL,
+       y = NULL) +
+  guides(alpha = FALSE,
+         color = FALSE) +
+  theme(axis.text = element_blank(),
+        strip.text = element_text(size = 9),
+        strip.text.y = element_text(angle=0))
+```
+
+    ## Warning: Removed 4705 rows containing missing values (geom_point).
+
+![](Data_Problem_Analysis_files/figure-markdown_github/create%20nbh%20year%20map%20plot-1.png)
 
 Zone 6
 ======

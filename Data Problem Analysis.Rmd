@@ -144,6 +144,39 @@ city_map_12 +
         axis.text = element_blank())
 ```
 
+The reporting problems appear most prominently in 2005 and 2006
+
+```{r create zone year facet map, message=FALSE, warning=FALSE}
+city_map_facets <-  ggmap(get_map("North Oakland, Pittsburgh, PA", 
+                     zoom = 12,
+                     maptype = "toner-lite", 
+                     source = "stamen"))
+```
+
+```{r create zone year facet df}
+df_map_zones_year <- df %>% 
+  select(year, zone, x, y) %>% 
+  filter(zone %in% c(1:6)) %>% 
+  mutate(zone = as.factor(paste("Zone", zone)))
+```
+
+```{r create zone year map plot}
+city_map_facets +
+  geom_point(data = df_map_zones_year, aes(x, y), alpha = .3, size = 1) +
+  facet_grid(zone~year) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+       x = NULL,
+       y = NULL) +
+  guides(alpha = FALSE,
+         color = FALSE) +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text = element_blank(),
+        strip.text = element_text(size = 9),
+        strip.text.y = element_text(angle=0))
+```
+
 #Neighborhood reporting consistency
 
 Does the data for the Neighborhoods look the same?
@@ -258,9 +291,9 @@ df_correct_zone %>%
   filter(correct_zone == "2")
 ```
 
-This approximation appears correct
+This approximation appears to be correct
 
-Then, calculate how many of a neighborhood's incidents were reported in the correct zone
+Then, calculate how many of a Neighborhood's incidents were reported in the correct zone
 ```{r calculate correct zone percentage}
 df_zones_nbh <- df %>% 
   mutate(key = paste(zone, neighborhood)) %>% 
@@ -380,6 +413,54 @@ ggplot(df_bad_zones, aes(zone, neighborhood, fill = n)) +
 Brookline has the most incidents reported in the incorrect zone
 
 Zone 3 is a major driver of incorrect Zone assignments
+
+Again, the reporting problems appear most prominently in 2005 and 2006
+```{r create nbh year facet map, message=FALSE, warning=FALSE}
+city_map_facets <-  ggmap(get_map("North Oakland, Pittsburgh, PA", 
+                                  zoom = 12,
+                                  maptype = "toner-lite", 
+                                  source = "stamen"))
+```
+
+```{r create nbh year facet df}
+df_nbh_year <- df %>% 
+  filter(neighborhood %in% c("Golden Triangle/Civic Arena", 
+                             "Bloomfield", 
+                             "North Oakland", 
+                             "South Side Flats",
+                             "Brookline", 
+                             "Homewood South", 
+                             "Central Oakland", 
+                             "Lincoln-Lemington Lamar", 
+                             "Carrick", 
+                             "Shadyside")) %>% 
+  select(year, neighborhood, x, y) %>% 
+  mutate(neighborhood = factor(neighborhood, levels =  c("Golden Triangle/Civic Arena", 
+                             "Bloomfield", 
+                             "North Oakland", 
+                             "South Side Flats",
+                             "Brookline", 
+                             "Homewood South", 
+                             "Central Oakland", 
+                             "Lincoln-Lemington Lamar", 
+                             "Carrick", 
+                             "Shadyside")))
+```
+
+```{r create nbh year map plot}
+city_map_facets +
+  geom_point(data = df_nbh_year, aes(x, y), alpha = .3, size = 1) +
+  facet_grid(neighborhood~year) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+       x = NULL,
+       y = NULL) +
+  guides(alpha = FALSE,
+         color = FALSE) +
+  theme(axis.text = element_blank(),
+        strip.text = element_text(size = 9),
+        strip.text.y = element_text(angle=0))
+```
 
 #Zone 6
 
