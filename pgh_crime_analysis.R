@@ -180,9 +180,6 @@ faceted_zone_map <- city_map +
 faceted_zone_map
 ggsave("faceted_zone_map.png", faceted_zone_map, width = 16, height = 9)
 
-
-
-
 zone_map <- city_map +
   geom_point(data = df_map_zones, aes(x, y, color = as.factor(zone)), alpha = .3, size = .7) +
   scale_color_viridis(discrete = TRUE) +
@@ -224,7 +221,7 @@ faceted_zone_map_year <- city_map_facets +
 faceted_zone_map_year
 ggsave("faceted_zone_map.png", faceted_zone_map_year, width = 16, height = 9)
   
-
+#neighborhood maps
 neighborhoods_top10 <- df %>% 
   filter(!is.na(neighborhood)) %>% 
   select(neighborhood, x, y) %>% 
@@ -267,8 +264,34 @@ nbh_map_faceted <- city_map +
         legend.direction = "horizontal",
         axis.text = element_blank())
 nbh_map_faceted
+
 #there appears to be a pattern in the error in the data. looks like the same arrests could have been reported across multiple neighborhoods. I'm assuming each incident is unique.
 
+#maps by neighborhood and year
+#zoom in for facets
+city_map_facets <-  ggmap(get_map("North Oakland, Pittsburgh, PA", 
+                                  zoom = 12,
+                                  maptype = "toner-lite", 
+                                  source = "stamen"))
+
+df_nbh_year <- df %>% 
+  filter(neighborhood %in% neighborhoods_top10$neighborhood) %>% 
+  select(year, neighborhood, x, y) %>% 
+  mutate(neighborhood = factor(neighborhood, levels = neighborhoods_top10$neighborhood))
+
+faceted_nbh_map_year <- city_map_facets +
+  geom_point(data = df_nbh_year, aes(x, y, color = neighborhood), alpha = .3, size = 1) +
+  facet_grid(neighborhood~year) +
+  scale_color_viridis(discrete = TRUE) +
+  labs(title = "Pittsburgh Crime Incident Data",
+       x = NULL,
+       y = NULL) +
+  guides(alpha = FALSE,
+         color = FALSE) +
+  theme(axis.text = element_blank(),
+        strip.text = element_text(size = 9))
+faceted_nbh_map_year
+ggsave("faceted_neighborhood_map.png", faceted_nbh_map_year, width = 16, height = 9)
 #identify the correct zones for neighborhoods by finding the zones with the highest # of incidents for a neighborhood
 df_correct_zone <- df %>% 
   mutate(key = paste(zone, neighborhood)) %>% 
