@@ -11,6 +11,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Last updated: `r paste(Sys.time())`
+
 This is an analysis of potential data problems in the Pittsburgh Police Incident Blotter Archive.
 
 These are the R packages used in this analysis:

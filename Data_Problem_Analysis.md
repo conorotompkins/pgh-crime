@@ -1,3 +1,5 @@
+Last updated: 2017-02-10 20:09:00
+
 This is an analysis of potential data problems in the Pittsburgh Police Incident Blotter Archive.
 
 These are the R packages used in this analysis:
