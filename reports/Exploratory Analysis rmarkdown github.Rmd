@@ -1,0 +1,212 @@
+---
+title: "Exploratory Analysis of Pittsburgh Police Incident Data"
+author: "Conor Tompkins"
+date: "January 28, 2017"
+output:
+  md_document:
+    variant: markdown_github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exploratory Analysis
+
+The Western Pennsylvania Regional Data Center (http://www.wprdc.org/) is a great resource for data about Pittsburgh
+
+They have published an archive of police incident data from 2005-2015
+
+You can download the data here: https://data.wprdc.org/dataset/uniform-crime-reporting-data
+
+We will be using the following R packages for this analysis
+
+- tidyverse
+- lubridate
+- viridis
+- ggmap
+
+Install these packages using the following code
+```{r install packages, eval = FALSE}
+install.packages(c("tidyverse", "lubridate", "viridis", "ggmap"))
+```
+
+Then load the packages
+```{r load libraries}
+library(tidyverse)
+library(lubridate)
+library(viridis)
+library(ggmap)
+```
+
+Set your working directory
+
+http://rprogramming.net/set-working-directory-in-r/
+
+Then, read the data into R
+```{r read data into r}
+df <- read_csv("archive-police-blotter.csv")
+```
+readr::read_csv tells us how it interpreted the column classes, and alerted us that it was unable to load 6 rows from the data
+
+Next, we will change the column names so they are easier to work with
+```{r lower case column names}
+colnames(df) <- tolower(colnames(df))
+```
+
+Then, rename the column names
+```{r rename columnn names}
+df <- df %>% 
+  rename(date_time = incidenttime,
+         location = incidentlocation,
+         cleared_flag = clearedflag,
+         neighborhood = incidentneighborhood,
+         zone = incidentzone,
+         description = hierarchydesc,
+         tract = incidenttract)
+```
+
+Next, we will use lubridate to change the relevant columns to dates and times
+```{r lubridate column names}
+df <- df %>%
+  mutate(date_time = mdy_hm(date_time),
+         date = ymd(substr(date_time, 1, 10)),
+         year = year(date),
+         month = month(date, label = TRUE),
+         wday = wday(date, label = TRUE),
+         mday = mday(date))
+```         
+
+Now we will reorder the columns and select the ones we want to work with
+```{r reorder column names}
+df <- df %>% 
+  select(date, 
+         year,
+         month,
+         wday,
+         mday,
+         location,
+         neighborhood,
+         zone,
+         description,
+         cleared_flag,
+         x,
+         y)
+```         
+
+Let's see how the data look now
+```{r glimpse data}
+glimpse(df)
+```
+
+Which zone has the most incidents?
+```{r zone incident count}
+df %>%
+  group_by(zone) %>% 
+  count() %>% 
+  arrange(-n)
+```
+
+Before we start making plots, we will load my custom theme
+```{r load custom theme}
+source("https://raw.githubusercontent.com/conorotompkins/AdjGSAA/master/graphs/theme_nhh.R")
+theme_set(theme_nhh())
+```
+
+How has the number of incidents changed over time?
+```{r incidents over time}
+df %>% 
+  filter(zone %in% c(1:6)) %>% 
+  group_by(zone, date) %>% 
+  count() %>% 
+  ggplot(aes(date, n, color = zone, fill = zone)) +
+  geom_smooth() +
+  scale_fill_viridis(discrete = TRUE) +
+  scale_color_viridis(discrete = TRUE)
+```
+
+Looks like there is a data or reporting problem in Zone 6
+
+Bob Gradeck pointed out that Zone 6 was closed in 2003 and reopened in 2008
+
+http://www.post-gazette.com/local/neighborhoods/2008/03/31/Police-manpower-tipped-to-West-End-s-Zone-6/stories/200803310145
+
+What does the trend look like if we just look at incidents since 2008?
+```{r incidents over time 2008}
+df %>% 
+  filter(zone %in% c(1:6), year >= 2008) %>% 
+  group_by(zone, date) %>% 
+  count() %>% 
+  ggplot(aes(date, n, color = zone, fill = zone)) +
+  geom_smooth() +
+  scale_fill_viridis(discrete = TRUE) +
+  scale_color_viridis(discrete = TRUE)
+```
+
+Which neighborhood has the most incidents?
+```{r neighborhood incident count}
+df %>%
+  group_by(neighborhood) %>% 
+  count() %>% 
+  arrange(-n)
+```
+
+Which incident descriptions are the most common?
+```{r incident descriptions}
+df %>%
+  group_by(description) %>% 
+  count() %>% 
+  arrange(-n)
+```
+Looks like there are many NA values
+
+Have the number of marijuana-related incidents changed over time?
+```{r marijuana incidents}
+pot_incidents <- df %>%
+  filter(grepl("MARIJUANA", description) == TRUE) %>%
+  group_by(date) %>% 
+  count() 
+
+#Plot the data
+ggplot(data = pot_incidents, aes(x = date, y = n)) +
+  geom_smooth()
+```
+
+Let's look at how the data looks on a map
+
+First, create the map
+```{r create map}
+city_map <-  get_map(location = "Oakland, Pittsburgh, PA",
+               zoom = 12,
+               maptype = "toner", 
+               source = "stamen",
+               messaging = FALSE)
+```
+
+View the map to make sure it looks right
+```{r view map}
+ggmap(city_map)
+```
+
+Filter out data that is not in one of the six police zones
+```{r filter map data}
+df_map <- df %>% 
+  filter(zone %in% c(1:6))
+```
+
+```{r plot map}
+ggmap(city_map) +
+  stat_density_2d(data = df_map, #Using a 2d contour
+                  aes(x, #longitude
+                      y, #latitude
+                      fill = ..level.., #Use the count of incidents as the fill
+                      alpha = .5), #Use alpha so you can see the map under the data
+                  geom = "polygon") + #We want the contour in a polygon
+  scale_fill_viridis() +
+  guides(alpha = FALSE,
+         fill = guide_colorbar("Count of Incidents")) +
+  labs(x = "",
+       y = "") +
+  theme_nhh() +
+  theme(axis.text = element_blank())
+```

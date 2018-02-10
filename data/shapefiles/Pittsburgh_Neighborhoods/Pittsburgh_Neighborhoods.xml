@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+<idinfo>
+<citation>
+<citeinfo>
+<title>Pittsburgh Neighborhoods</title>
+<onlink>http://maps.pittsburghpa.gov/arcgis/rest/services/OpenData/PGHODNeighborhoods/FeatureServer</onlink>
+</citeinfo>
+</citation>
+<descript>
+<abstract>Pittsburgh City NeighborhoodsMetadata: https://www.arcgis.com/sharing/rest/content/items/87a7e06c5d8440f280ce4b1e4f75cc84/info/metadata/metadata.xml?format=default&amp;amp;output=html</abstract>
+<purpose>Pittsburgh City Neighborhoods</purpose>
+</descript>
+<spdom>
+<bounding>
+<westbc>-80.096786</westbc>
+<eastbc>-79.86287</eastbc>
+<northbc>40.503675</northbc>
+<southbc>40.358</southbc>
+</bounding>
+</spdom>
+<keywords>
+<theme>
+<themekt>None</themekt>
+<themekey>Pittsburgh</themekey>
+<themekey>Geography</themekey>
+</theme>
+</keywords>
+<accconst>None</accconst>
+<useconst>None</useconst>
+</idinfo>
+<metainfo>
+<metd>20151015</metd>
+<metc>
+<cntinfo>
+<!--no contact person or organization name available-->
+<cntaddr>
+<addrtype>unknown</addrtype>
+<country>AF</country>
+</cntaddr>
+</cntinfo>
+</metc>
+<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+<metstdv>FGDC-STD-001-1998</metstdv>
+<mettc>local time</mettc>
+</metainfo>
+</metadata>
