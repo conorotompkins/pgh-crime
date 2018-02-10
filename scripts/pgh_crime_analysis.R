@@ -1,20 +1,13 @@
-setwd("C:/Users/conor/githubfolder/pgh-crime")
-
-source("https://raw.githubusercontent.com/conorotompkins/AdjGSAA/master/graphs/theme_nhh.R")
-
 library(tidyverse)
 library(lubridate)
 library(viridis)
 library(ggmap)
 library(scales)
-library(forcats)
 
-theme_set(theme_nhh())
+theme_set(theme_bw(base_size = 18))
 
-data <- read_csv("archive-police-blotter.csv") #Read tge data into R
+df <- read_csv("data/archive-police-blotter.csv") #Read the data into R
 problems(data) #There are 6 rows that could not be processed
-
-df <- data
 
 colnames(df) <- tolower(colnames(df)) #Change all the column names to lower case
 
@@ -51,8 +44,8 @@ df <- df %>%
          x,
          y)
 
-df <- df %>%
-  mutate(wday = factor(wday, levels = c("Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun")))
+#df <- df %>%
+#  mutate(wday = factor(wday, levels = c("Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun")))
 
 glimpse(df) #View the data
 
@@ -85,7 +78,7 @@ df %>%
   count() %>% 
   arrange(-n)
 
-
+#does not work
 df %>% 
   filter(zone == c(1:6)) %>% 
   group_by(zone, neighborhood, date) %>% 
@@ -110,16 +103,20 @@ df %>%
 #Create a dataframe
 pot_arrests <- df %>%
   filter(grepl("MARIJUANA", description) == TRUE) %>%
-  group_by(date) %>% 
-  count() 
+  count(date)
 
 #Plot the data
 ggplot(data = pot_arrests, aes(x = date, y = n)) +
   geom_smooth()
 
 df %>% 
-  group_by(month, wday) %>% 
-  count() %>% 
+  filter(!is.na(month), !is.na(wday)) %>% 
+  count(month, wday) %>% 
+  arrange(month, wday) %>% 
+  complete(month, wday) %>% 
+  replace_na(list(n = 0)) -> df_tile
+
+df_tile %>% 
   ggplot(aes(month, wday, fill = n)) +
   geom_tile() +
   coord_equal() +
@@ -127,7 +124,6 @@ df %>%
   scale_y_discrete(expand = c(0,0),
                    limits = rev(levels(df$wday))) +
   scale_fill_viridis()
-
 
 #Let's look at how the data looks on a map
 #First, create the map
