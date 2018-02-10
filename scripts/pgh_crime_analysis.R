@@ -1,51 +1,10 @@
-library(tidyverse)
-library(lubridate)
+source("scripts/load_data.R")
+
 library(viridis)
 library(ggmap)
 library(scales)
 
 theme_set(theme_bw(base_size = 18))
-
-df <- read_csv("data/archive-police-blotter.csv") #Read the data into R
-problems(data) #There are 6 rows that could not be processed
-
-colnames(df) <- tolower(colnames(df)) #Change all the column names to lower case
-
-#Rename the column names so they are easier to work with
-df <- df %>% 
-  rename(date_time = incidenttime,
-         location = incidentlocation,
-         cleared_flag = clearedflag,
-         neighborhood = incidentneighborhood,
-         zone = incidentzone,
-         description = hierarchydesc,
-         tract = incidenttract)
-
-
-df <- df %>%
-  mutate(date_time = mdy_hm(date_time), #Create dates and times with Lubridate
-         date = ymd(substr(date_time, 1, 10)),
-         year = year(date),
-         month = month(date, label = TRUE),
-         wday = wday(date, label = TRUE),
-         mday = mday(date),
-         hour = hour(date_time)) %>% 
-  select(date, #select the columnns we want
-         year,
-         month,
-         wday,
-         mday,
-         hour,
-         location,
-         neighborhood,
-         zone,
-         description,
-         cleared_flag,
-         x,
-         y)
-
-#df <- df %>%
-#  mutate(wday = factor(wday, levels = c("Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun")))
 
 glimpse(df) #View the data
 
@@ -54,7 +13,6 @@ df %>%
   group_by(zone) %>% 
   count() %>% 
   arrange(-n)
-
 
 #How has the number of arrests changed over time?
 df %>% 
@@ -68,7 +26,7 @@ df %>%
   scale_fill_viridis(discrete = TRUE) +
   scale_color_viridis(discrete = TRUE) +
   coord_cartesian(ylim = c(0, 75))
-ggsave("pgh_crime_date_zone_line_plot.png", width = 16, height = 9)
+ggsave("images/pgh_crime_date_zone_line_plot.png", width = 16, height = 9)
 
 #Looks like there is a data or reporting problem in Zone 6
 
@@ -77,19 +35,6 @@ df %>%
   group_by(neighborhood) %>% 
   count() %>% 
   arrange(-n)
-
-#does not work
-df %>% 
-  filter(zone == c(1:6)) %>% 
-  group_by(zone, neighborhood, date) %>% 
-  count() %>% 
-  arrange(zone, neighborhood, date) %>% 
-  mutate(cumsum = cumsum(n)) %>% 
-  ggplot(aes(date, cumsum, color = neighborhood, fill = neighborhood)) +
-  geom_line() +
-  facet_wrap(~zone, ncol = 1) +
-  scale_fill_viridis(discrete = TRUE) +
-  scale_color_viridis(discrete = TRUE)
 
 #Which arrest descriptions are the most common?
 df %>%
