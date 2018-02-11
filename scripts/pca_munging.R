@@ -1,13 +1,12 @@
 source("scripts/load_data_new.R")
 
 df %>% 
-  filter(date >= "2016-01-01", !is.na(neighborhood)) -> df
+  filter(date >= "2016-01-01", !is.na(neighborhood), zone %in% c(1:6), !(neighborhood %in% c("Outside State", "Outside County", "Outside City"))) -> df
 
 #consider filtering out "Not recorded"
 df %>%
   count(description, sort = TRUE) %>% 
-  replace_na(list(description = "Not recorded")) %>%
-  filter(n >= 500) -> df_top_crimes
+  filter(!is.na(description), n >= 500) -> df_top_crimes
 df_top_crimes
 
 description_list <- df_top_crimes$description
