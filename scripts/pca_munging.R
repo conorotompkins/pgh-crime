@@ -6,7 +6,7 @@ df %>%
 #consider filtering out "Not recorded"
 df %>%
   count(description, sort = TRUE) %>% 
-  filter(!is.na(description), n >= 500) -> df_top_crimes
+  filter(!is.na(description), n >= 800) -> df_top_crimes
 df_top_crimes
 
 description_list <- df_top_crimes$description
