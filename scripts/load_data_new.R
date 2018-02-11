@@ -35,6 +35,7 @@ df %>%
          location,
          neighborhood,
          zone,
+         hierarchy,
          description,
          cleared_flag,
          x,
