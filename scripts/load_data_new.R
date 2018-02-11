@@ -1,7 +1,6 @@
 library(tidyverse)
 library(lubridate)
 
-
 #df <- read_csv("data/archive-police-blotter.csv") #Read the data into R
 df <- read_csv("data/pittsburgh_crime_UCR_coded.csv")
 problems(data) #There are 6 rows that could not be processed
@@ -19,12 +18,12 @@ df <- df %>%
          tract = incidenttract)
 
 #dates not parsing correctly
-df <- df %>%
-  mutate(date_time = mdy_hm(date_time), #Create dates and times with Lubridate
-         date = ymd(substr(date_time, 1, 10)),
+df %>% 
+  mutate(date_time = ymd_hms(date_time),
+         date = ymd(str_sub(date_time, 1, 10)),
          year = year(date),
          month = month(date, label = TRUE),
-         wday = wday(date, label = TRUE),
+         wday = wday(date),
          mday = mday(date),
          hour = hour(date_time)) %>% 
   select(date, #select the columnns we want
@@ -39,4 +38,4 @@ df <- df %>%
          description,
          cleared_flag,
          x,
-         y)
+         y) -> df
