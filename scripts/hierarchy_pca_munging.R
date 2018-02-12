@@ -1,20 +1,24 @@
 source("scripts/load_data_new.R")
 
 df %>% 
-  filter(date >= "2016-01-01", !is.na(neighborhood), zone %in% c(1:6), !(neighborhood %in% c("Outside State", "Outside County", "Outside City"))) -> df
+  filter(date >= "2016-01-01", 
+         !is.na(neighborhood), 
+         zone %in% c(1:6), 
+         !(neighborhood %in% c("Outside State", "Outside County", "Outside City")),
+         hierarchy != 99) -> df
 
 #consider filtering out "Not recorded"
 df %>%
-  count(hierarchy, sort = TRUE) %>% 
-  filter(!is.na(hierarchy), n >= 800) -> df_top_crimes
+  count(hierarchy, hierarchy_description, sort = TRUE) %>% 
+  arrange(hierarchy) -> df_top_crimes
 df_top_crimes
 
-hierarchy_list <- df_top_crimes$hierarchy
+hierarchy_description_list <- df_top_crimes$hierarchy_description
 
 df %>% 
   semi_join(df_top_crimes) %>% 
-  count(neighborhood, hierarchy) %>% 
-  complete(neighborhood, hierarchy = hierarchy_list) %>% 
+  count(neighborhood, hierarchy_description) %>% 
+  complete(neighborhood, hierarchy_description = hierarchy_description_list) %>% 
   replace_na(list(n = 0)) %>% 
   arrange(neighborhood, desc(n)) -> df
 
@@ -27,5 +31,6 @@ df %>%
   select(-n, -neighborhood_total) -> df
 
 df %>% 
-  spread(key = hierarchy, value = crime_percentage) -> df
+  spread(key = hierarchy_description, value = crime_percentage) -> df
+
 df
