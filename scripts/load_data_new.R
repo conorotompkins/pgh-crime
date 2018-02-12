@@ -8,14 +8,19 @@ problems(data) #There are 6 rows that could not be processed
 colnames(df) <- tolower(colnames(df)) #Change all the column names to lower case
 colnames(df)
 #Rename the column names so they are easier to work with
-df <- df %>% 
+df %>% 
   rename(date_time = incidenttime,
          location = incidentlocation,
          cleared_flag = clearedflag,
          neighborhood = incidentneighborhood,
          zone = incidentzone,
          description = incidenthierarchydesc,
-         tract = incidenttract)
+         tract = incidenttract) -> df
+
+df_ucr <- read_csv("data/ucr_codes.csv")
+
+df %>% 
+  left_join(df_ucr) -> df
 
 #dates not parsing correctly
 df %>% 
@@ -36,6 +41,7 @@ df %>%
          neighborhood,
          zone,
          hierarchy,
+         hierarchy_description,
          description,
          cleared_flag,
          x,
