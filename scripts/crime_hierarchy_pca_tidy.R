@@ -55,4 +55,4 @@ df_pca %>%
     )
   ) %>%
   pull(pca_graph)
-ggsave("images/neighborhood_crime_pca_graph.png")
+ggsave("images/neighborhood_crime_hierarchy_pca_graph.png")
