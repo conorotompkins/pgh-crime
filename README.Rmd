@@ -4,11 +4,13 @@ output: github_document
 
 # pgh-crime
 This is a repo for analyzing crime data in Pittsburgh PA
-```{r setup, include=TRUE}
-knitr::opts_chunk$set(include = FALSE)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	message = FALSE,
+	warning = FALSE)
 ```
 
-```{r load_libraries}
+```{r load_libraries, message=FALSE, warning=FALSE, paged.print=FALSE, cache = TRUE}
 source("scripts/load_data_new.R")
 
 library(viridis)
@@ -18,7 +20,7 @@ library(scales)
 theme_set(theme_bw(base_size = 18))
 ```
 
-```{r create_map, message=FALSE, warning=FALSE, paged.print=FALSE}
+```{r create_map, message=FALSE, warning=FALSE, paged.print=FALSE, cache=TRUE}
 city_map <-  get_map("North Oakland, Pittsburgh, PA", 
                      zoom = 12,
                      maptype = "toner", 
