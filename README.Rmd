@@ -5,7 +5,7 @@ output: github_document
 # pgh-crime
 This is a repo for analyzing crime data in Pittsburgh PA
 ```{r setup, include=TRUE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(include = FALSE)
 ```
 
 ```{r load_libraries}
@@ -47,10 +47,12 @@ city_map +
   scale_fill_viridis() +
   guides(alpha = FALSE,
          fill = guide_colorbar("Count of Arrests")) +
-  labs(title = str_c("Arrests in Pittsburgh, ", date_first, "-", date_last),
+  labs(title = str_c("Arrests in Pittsburgh, ", date_first, " to ", date_last),
        x = "",
        y = "") +
   theme(legend.position = "bottom",
         legend.direction = "horizontal",
-        axis.text = element_blank())
+        axis.text = element_blank(),
+        legend.key.width = unit(.1, "npc"))
 ```
+
